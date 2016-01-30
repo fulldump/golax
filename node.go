@@ -1,4 +1,4 @@
-package api
+package golax
 
 type Node struct {
 	Path        string

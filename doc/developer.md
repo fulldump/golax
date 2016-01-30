@@ -12,19 +12,7 @@ This part cover some of the implementation decisions taken along the development
 
 ## Decision #1
 
-Handler functions has 3 parameters:
-
-```
-func (w http.ResponseWriter, r *http.Request, c *lax.Context) {
-    
-}
-```
-
-* w - Response writer (from standard http library)
-* r - Request  (from standard http library)
-* c - The context object, allow pass data between middlewares and methods
-
-Why not embed `w` and `r` into `c` and have a simpler function signature?
+Handler functions has 1 parameter:
 
 ```
 func (c *lax.Context) {
@@ -32,7 +20,22 @@ func (c *lax.Context) {
 }
 ```
 
-The main reason is to maintain familiarity between the old handlers and Lax. You could copy & paste the code 
+Why not `w`, `r` and `c` and maintain developer compatibility?
 
-The secondary reason is code readability. Since `w` and `r` are used in all (or almost all) cases, `w.Write(...)` is more readable than `c.w.Write(...)`.
+We would ended up with the following signature:
+
+```
+func (w http.ResponseWriter, r *http.Request, c *lax.Context) {
+    
+}
+```
+
+Old code is not going to work by doing copy&paste, but you only have to replace:
+
+* `w` by `c.Response`
+* `r` by `c.Request`
+
+Making this decision is hard but `c *lax.Context` is much easier to remember.
+
+About code readability, `w.Write(...)` is shorter but `c.Response.Write(...)` is more semantic.
 
