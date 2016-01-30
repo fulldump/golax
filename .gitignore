@@ -1,0 +1,5 @@
+
+_vendor/bin
+_vendor/pkg
+_vendor/src/example
+_vendor/src/github.com/fulldump/golax
