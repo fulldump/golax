@@ -1,4 +1,4 @@
-# Golax
+<img src="logo.png">
 
 Golax is the official go implementation for the _Lax_ pattern.
 
