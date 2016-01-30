@@ -1,13 +1,16 @@
 # Golax
 
+Golax is the official go implementation for the _Lax_ pattern.
+
 <!-- MarkdownTOC autolink=true bracket=round depth=4 -->
 
+- [About Lax](#about-lax)
 - [Getting started](#getting-started)
 - [Sample use cases](#sample-use-cases)
 
 <!-- /MarkdownTOC -->
 
-Golax is the official go implementation for the _Lax_ pattern.
+## About Lax
 
 Lax wants to be the best _"user experience"_ for developers.
 
@@ -20,7 +23,7 @@ The design principles for _Lax_ are:
 
 ## Getting started
 
-```golang
+```go
 my_api := golax.NewApi()
 
 my_api.Root.AddNode("hello").
@@ -33,8 +36,8 @@ my_api.Serve()
 
 ## Sample use cases
 
-```
-// TODO: put here some examples to cover cool things:
+TODO: put here some examples to cover cool things:
+
 * parameters
 * fluent implementation
 * node cycling
@@ -43,5 +46,3 @@ my_api.Serve()
 * sample logging middleware
 * sample auth middleware
 * sample api errors
-```
-
