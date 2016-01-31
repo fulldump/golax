@@ -1,5 +1,9 @@
 <img src="logo.png">
 
+<p align="center">
+<img src="https://api.travis-ci.org/fulldump/golax.svg?branch=master">
+</p>
+
 Golax is the official go implementation for the _Lax_ pattern.
 
 <!-- MarkdownTOC autolink=true bracket=round depth=4 -->
