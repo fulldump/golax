@@ -30,7 +30,7 @@ It is a CRUD over a `users` collection.
 
 Command:
 ```sh
-curl curl -i http://localhost:8000/service/v1/users/
+curl -i http://localhost:8000/service/v1/users/
 ```
 
 Result:

@@ -3,26 +3,23 @@ package golax
 import "net/http/httptest"
 
 type World struct {
-	Api        *Api
-	Server     *Server
-	TestServer *httptest.Server
+	Api    *Api
+	Server *httptest.Server
 }
 
 func NewWorld() *World {
-	server := NewServer()
-	server.Api = NewApi()
+	api := NewApi()
 
 	return &World{
-		Api:        server.Api,
-		Server:     server,
-		TestServer: httptest.NewServer(server),
+		Api:    api,
+		Server: httptest.NewServer(api),
 	}
 }
 
 func (this *World) Destroy() {
-	this.TestServer.Close()
+	this.Server.Close()
 }
 
 func (this *World) Request(method, path string) *RequestTest {
-	return NewRequestTest(method, this.TestServer.URL+path)
+	return NewRequestTest(method, this.Server.URL+path)
 }

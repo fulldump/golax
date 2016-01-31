@@ -5,6 +5,7 @@
 * write some documentation examples
 * implement some out-of-the-box middlewares
 * performance benchmarks
+* More flexible `Api.Serve()`
 
 ## Done
 * parameters
