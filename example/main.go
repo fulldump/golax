@@ -14,11 +14,11 @@ func main() {
 
 	my_api.Root.Middleware(golax.MiddlewareError)
 
-	users := my_api.Root.AddNode("users").
+	users := my_api.Root.Node("users").
 		Method("GET", get_users).
 		Method("POST", post_users)
 
-	users.AddNode("{user_id}").
+	users.Node("{user_id}").
 		Middleware(middleware_user).
 		Method("GET", get_user).
 		Method("POST", post_user).

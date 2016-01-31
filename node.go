@@ -35,7 +35,7 @@ func (this *Node) Middleware(m *Middleware) *Node {
 	return this
 }
 
-func (this *Node) AddNode(p string) *Node {
+func (this *Node) Node(p string) *Node {
 	new_node := NewNode()
 	new_node.Path = p
 

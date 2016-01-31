@@ -67,7 +67,7 @@ func Test_Prefix(t *testing.T) {
 
 	world.Api.Prefix = "/my/prefix/v3"
 
-	world.Api.Root.AddNode("resource").Method(
+	world.Api.Root.Node("resource").Method(
 		"GET",
 		func(c *Context) {
 			fmt.Fprint(c.Response, "My resource")
@@ -97,7 +97,7 @@ func Test_Methods_ok(t *testing.T) {
 	for _, method := range methods {
 		world := NewWorld()
 
-		world.Api.Root.AddNode("hello").Method(method, func(c *Context) {
+		world.Api.Root.Node("hello").Method(method, func(c *Context) {
 			c.Response.WriteHeader(432)
 		})
 
@@ -129,7 +129,7 @@ func Test_Method_asterisk_ok(t *testing.T) {
 	for _, method := range methods {
 		world := NewWorld()
 
-		world.Api.Root.AddNode("hello").Method("*", func(c *Context) {
+		world.Api.Root.Node("hello").Method("*", func(c *Context) {
 			c.Response.WriteHeader(432)
 		})
 
@@ -160,11 +160,11 @@ func Test_Method_not_asterisk_ok(t *testing.T) {
 	for _, method := range methods {
 		world := NewWorld()
 
-		world.Api.Root.AddNode("hello").Method(method, func(c *Context) {
+		world.Api.Root.Node("hello").Method(method, func(c *Context) {
 			c.Response.WriteHeader(432)
 		})
 
-		world.Api.Root.AddNode("hello").Method("*", func(c *Context) {
+		world.Api.Root.Node("hello").Method("*", func(c *Context) {
 			c.Response.WriteHeader(431)
 		})
 
@@ -194,7 +194,7 @@ func Test_Method_lowercase_ok(t *testing.T) {
 	for _, method := range methods {
 		world := NewWorld()
 
-		world.Api.Root.AddNode("hello").Method(method, func(c *Context) {
+		world.Api.Root.Node("hello").Method(method, func(c *Context) {
 			c.Response.WriteHeader(432)
 		})
 
@@ -225,7 +225,7 @@ func Test_Method_uppercase_ok(t *testing.T) {
 	for _, method := range methods {
 		world := NewWorld()
 
-		world.Api.Root.AddNode("hello").Method(method, func(c *Context) {
+		world.Api.Root.Node("hello").Method(method, func(c *Context) {
 			c.Response.WriteHeader(432)
 		})
 
@@ -256,7 +256,7 @@ func Test_Method_error_555(t *testing.T) {
 		},
 	})
 
-	world.Api.Root.AddNode("hello").Method("GET", func(c *Context) {
+	world.Api.Root.Node("hello").Method("GET", func(c *Context) {
 		c.Error(555, "Sample error")
 	})
 
@@ -273,7 +273,7 @@ func Test_Parameter(t *testing.T) {
 	world := NewWorld()
 	defer world.Destroy()
 
-	world.Api.Root.AddNode("users").AddNode("{id}").Method("GET", func(c *Context) {
+	world.Api.Root.Node("users").Node("{id}").Method("GET", func(c *Context) {
 		fmt.Fprintln(c.Response, "The user is "+c.Parameter)
 	})
 
@@ -312,14 +312,14 @@ func Test_Parameter_precedence(t *testing.T) {
 		},
 	})
 
-	users := root.AddNode("users")
+	users := root.Node("users")
 
-	stats := users.AddNode("stats")
+	stats := users.Node("stats")
 	stats.Method("GET", func(c *Context) {
 		fmt.Fprint(c.Response, "There are 2000 users")
 	})
 
-	user := users.AddNode("{user_id}")
+	user := users.Node("{user_id}")
 	user.Method("GET", func(c *Context) {
 		user_id, _ := strconv.Atoi(c.Parameter)
 		if user_id > 2000 {
