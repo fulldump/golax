@@ -12,13 +12,11 @@ type Server struct {
 }
 
 func default_handler_404(c *Context) {
-	http.Error(c.Response, "Error 404: Not found",
-		http.StatusNotFound)
+	c.Error(404, "Not found")
 }
 
 func default_handler_405(c *Context) {
-	http.Error(c.Response, "Error 405: Method not allowed",
-		http.StatusMethodNotAllowed)
+	c.Error(405, "Method not allowed")
 }
 
 func NewServer() *Server {

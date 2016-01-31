@@ -1,5 +1,7 @@
 package golax
 
+import "encoding/json"
+
 /**
  * Core middlewares free to use
  */
@@ -7,7 +9,7 @@ package golax
 var MiddlewareError = &Middleware{
 	After: func(c *Context) {
 		if nil != c.LastError {
-			c.Response.WriteHeader(c.LastError.Status)
+			json.NewEncoder(c.Response).Encode(c.LastError)
 		}
 	},
 }

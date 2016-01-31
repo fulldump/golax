@@ -1,7 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
+	"strconv"
 
 	"github.com/fulldump/golax"
 )
@@ -9,22 +10,16 @@ import (
 func main() {
 
 	my_api := golax.NewApi()
+	my_api.Prefix = "/service/v1"
 
-	service := my_api.Root.AddNode("service")
-	service.AddMethod("GET", func(c *golax.Context) {
-		fmt.Fprintln(c.Response, "I am the service")
-	})
+	my_api.Root.AddMiddleware(golax.MiddlewareError)
 
-	v1 := service.AddNode("v1")
-	v1.AddMethod("GET", func(c *golax.Context) {
-		fmt.Fprintln(c.Response, "I am the version")
-	})
-
-	users := v1.AddNode("users").
+	users := my_api.Root.AddNode("users").
 		AddMethod("GET", get_users).
 		AddMethod("POST", post_users)
 
 	users.AddNode("{user_id}").
+		AddMiddleware(middleware_user).
 		AddMethod("GET", get_user).
 		AddMethod("POST", post_user).
 		AddMethod("DELETE", delete_user)
@@ -33,21 +28,62 @@ func main() {
 }
 
 func get_users(c *golax.Context) {
-	fmt.Fprintln(c.Response, "Fulanito, Menganito, Zutanito")
+	ids := []int{}
+	for id, _ := range users {
+		ids = append(ids, id)
+	}
+
+	json.NewEncoder(c.Response).Encode(ids)
 }
 
 func post_users(c *golax.Context) {
-	fmt.Fprintln(c.Response, "Creating a new user...")
+	u := &User{}
+
+	json.NewDecoder(c.Request.Body).Decode(u)
+
+	insert_user(u)
+
+	c.Response.WriteHeader(201)
+	json.NewEncoder(c.Response).Encode(map[string]interface{}{"id": u.id})
 }
 
 func get_user(c *golax.Context) {
-	fmt.Fprintln(c.Response, "Reading the user "+c.Parameter)
+	u := get_context_user(c)
+
+	json.NewEncoder(c.Response).Encode(u)
 }
 
 func post_user(c *golax.Context) {
-	fmt.Fprintln(c.Response, "updating the user "+c.Parameter)
+	u := get_context_user(c)
+
+	json.NewDecoder(c.Request.Body).Decode(u)
 }
 
 func delete_user(c *golax.Context) {
-	fmt.Fprintln(c.Response, "Deleting the user "+c.Parameter)
+	u := get_context_user(c)
+	delete(users, u.id)
+}
+
+/**
+ * Middleware {user_id}
+ * if: `user_id` exists -> load the object and put it available in the context
+ * else: raise 404
+ */
+var middleware_user = &golax.Middleware{
+	Before: func(c *golax.Context) {
+		user_id, _ := strconv.Atoi(c.Parameter)
+		if user, exists := users[user_id]; exists {
+			c.Set("user", user)
+		} else {
+			c.Error(404, "user `"+c.Parameter+"` does not exist")
+		}
+	},
+}
+
+/**
+ * Helper to get a user object from the context
+ */
+func get_context_user(c *golax.Context) *User {
+	v, _ := c.Get("user")
+	return v.(*User)
 }

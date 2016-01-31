@@ -30,10 +30,6 @@ func Test_404_ok(t *testing.T) {
 	if http.StatusNotFound != response.StatusCode {
 		t.Error("Status code '404' is expected")
 	}
-
-	if "Error 404: Not found\n" != response.BodyString() {
-		t.Error("Body 'Error 404: Not found\\n' is expected")
-	}
 }
 
 func Test_405_ok(t *testing.T) {
@@ -48,10 +44,6 @@ func Test_405_ok(t *testing.T) {
 
 	if http.StatusMethodNotAllowed != response.StatusCode {
 		t.Error("Status code '405' is expected")
-	}
-
-	if "Error 405: Method not allowed\n" != response.BodyString() {
-		t.Error("Body 'Error 405: Method not allowed\\n' is expected")
 	}
 }
 
@@ -259,13 +251,13 @@ func Test_Method_error_555(t *testing.T) {
 	world.Api.Root.AddMiddleware(&Middleware{
 		After: func(c *Context) {
 			if nil != c.LastError {
-				c.Response.WriteHeader(c.LastError.Status)
+				c.Response.WriteHeader(c.LastError.StatusCode)
 			}
 		},
 	})
 
 	world.Api.Root.AddNode("hello").AddMethod("GET", func(c *Context) {
-		c.Error(555, 1, "Sample error")
+		c.Error(555, "Sample error")
 	})
 
 	response := world.Request("GET", "/hello").Do()
@@ -314,7 +306,7 @@ func Test_Parameter_precedence(t *testing.T) {
 	root.AddMiddleware(&Middleware{
 		After: func(c *Context) {
 			if nil != c.LastError {
-				c.Response.WriteHeader(c.LastError.Status)
+				c.Response.WriteHeader(c.LastError.StatusCode)
 				fmt.Fprint(c.Response, c.LastError.Description)
 			}
 		},
@@ -331,7 +323,7 @@ func Test_Parameter_precedence(t *testing.T) {
 	user.AddMethod("GET", func(c *Context) {
 		user_id, _ := strconv.Atoi(c.Parameter)
 		if user_id > 2000 {
-			c.Error(404, 1, "User "+c.Parameter+" does not exist")
+			c.Error(404, "User "+c.Parameter+" does not exist")
 			return
 		}
 

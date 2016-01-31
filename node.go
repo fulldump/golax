@@ -30,8 +30,9 @@ func (this *Node) AddMethod(m string, h Handler) *Node {
 	return this
 }
 
-func (this *Node) AddMiddleware(m *Middleware) {
+func (this *Node) AddMiddleware(m *Middleware) *Node {
 	this.middlewares = append(this.middlewares, m)
+	return this
 }
 
 func (this *Node) AddNode(p string) *Node {

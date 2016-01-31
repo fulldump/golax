@@ -12,9 +12,9 @@ type Context struct {
 }
 
 type ContextError struct {
-	Status      int
-	Code        int
-	Description string
+	StatusCode  int    `json: "status_code"`
+	ErrorCode   int    `json: "error_code"`
+	Description string `json: "description_code"`
 }
 
 func NewContext() *Context {
@@ -25,12 +25,14 @@ func NewContext() *Context {
 	}
 }
 
-func (this *Context) Error(s int, c int, d string) {
-	this.LastError = &ContextError{
-		Status:      s,
-		Code:        c,
+func (this *Context) Error(s int, d string) *ContextError {
+	this.Response.WriteHeader(s)
+	e := &ContextError{
+		StatusCode:  s,
 		Description: d,
 	}
+	this.LastError = e
+	return e
 }
 
 func (this *Context) Set(k string, v interface{}) {
