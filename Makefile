@@ -5,11 +5,9 @@ GOPKG=$(GOPATH)/pkg
 GO=go
 GOCMD=GOPATH=$(GOPATH) GOBIN=$(GOBIN) $(GO)
 
-.DEFAULT_GOAL := build_example
+.DEFAULT_GOAL := test
 
-.PHONY: all build clean dependencies setup
-
-all: build
+.PHONY: test clean dependencies setup example
 
 clean:
 	rm -fr _vendor
@@ -19,11 +17,11 @@ setup:
 	ln -s ../../../.. _vendor/src/github.com/fulldump/golax
 	ln -s ../../example _vendor/src/example
 
-test:
+test: clean setup
 	$(GOCMD) test ./...
 
 dependencies:
 	$(GOCMD) get $(PROJECT)
 
-build_example: clean setup
+example: clean setup
 	$(GOCMD) install example

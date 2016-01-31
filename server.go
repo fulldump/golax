@@ -38,12 +38,24 @@ func (this *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c.Response = w
 	c.Request = r
 
-	// TODO: process this.Api.Prefix
-
 	path := r.URL.Path
+
+	// Remove prefix
+	if strings.HasPrefix(path, this.Api.Prefix) {
+		path = strings.TrimPrefix(path, this.Api.Prefix)
+	}
+
+	// Split path
 	parts := strings.Split(path, "/")[1:]
 
+	// Remove last part if empty
+	last := len(parts) - 1
+	if last >= 0 && "" == parts[last] {
+		parts = parts[:last]
+	}
+
 	current := this.Api.Root
+	push_middlewares(current, c)
 	for _, part := range parts {
 
 		found := false
@@ -60,21 +72,56 @@ func (this *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if !found {
-			this.Handler404(c)
+		if found {
+			push_middlewares(current, c)
+		} else {
+			run_handler_in_context(this.Handler404, c)
 			return
 		}
 	}
 
-	if f, exists := current.Methods[r.Method]; exists {
-		f(c)
+	method := strings.ToUpper(r.Method)
+	if f, exists := current.Methods[method]; exists {
+		run_handler_in_context(f, c)
 		return
 	}
 
 	if f, exists := current.Methods["*"]; exists {
-		f(c)
+		run_handler_in_context(f, c)
 		return
 	}
 
-	this.Handler405(c)
+	run_handler_in_context(this.Handler405, c)
+}
+
+func run_handler_in_context(f Handler, c *Context) {
+
+	afters := []Handler{}
+
+	for _, middleware := range c.Middlewares {
+		if nil != middleware.After {
+			afters = append(afters, middleware.After)
+		}
+		if nil != middleware.Before {
+			middleware.Before(c)
+			if nil != c.LastError {
+				break
+			}
+		}
+	}
+
+	if nil == c.LastError {
+		f(c)
+	}
+
+	for i := len(afters) - 1; i >= 0; i-- {
+		afters[i](c)
+	}
+
+}
+
+func push_middlewares(n *Node, c *Context) {
+	for _, m := range n.middlewares {
+		c.Middlewares = append(c.Middlewares, m)
+	}
 }
