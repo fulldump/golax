@@ -30,8 +30,8 @@ The design principles for _Lax_ are:
 ```go
 my_api := golax.NewApi()
 
-my_api.Root.AddNode("hello").
-AddMethod("GET", func(c *golax.Context) {
+my_api.Root.Node("hello").
+Method("GET", func(c *golax.Context) {
     fmt.Fprintln(c.Response, "Hello world!")
 })
 
