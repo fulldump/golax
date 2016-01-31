@@ -15,14 +15,14 @@ func main() {
 	my_api.Root.AddMiddleware(golax.MiddlewareError)
 
 	users := my_api.Root.AddNode("users").
-		AddMethod("GET", get_users).
-		AddMethod("POST", post_users)
+		Method("GET", get_users).
+		Method("POST", post_users)
 
 	users.AddNode("{user_id}").
 		AddMiddleware(middleware_user).
-		AddMethod("GET", get_user).
-		AddMethod("POST", post_user).
-		AddMethod("DELETE", delete_user)
+		Method("GET", get_user).
+		Method("POST", post_user).
+		Method("DELETE", delete_user)
 
 	my_api.Serve()
 }

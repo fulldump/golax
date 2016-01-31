@@ -23,7 +23,7 @@ func NewNode() *Node {
 	}
 }
 
-func (this *Node) AddMethod(m string, h Handler) *Node {
+func (this *Node) Method(m string, h Handler) *Node {
 	// TODO: m to uppercase
 	M := strings.ToUpper(m)
 	this.Methods[M] = h
