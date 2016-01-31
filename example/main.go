@@ -12,14 +12,14 @@ func main() {
 	my_api := golax.NewApi()
 	my_api.Prefix = "/service/v1"
 
-	my_api.Root.AddMiddleware(golax.MiddlewareError)
+	my_api.Root.Middleware(golax.MiddlewareError)
 
 	users := my_api.Root.AddNode("users").
 		Method("GET", get_users).
 		Method("POST", post_users)
 
 	users.AddNode("{user_id}").
-		AddMiddleware(middleware_user).
+		Middleware(middleware_user).
 		Method("GET", get_user).
 		Method("POST", post_user).
 		Method("DELETE", delete_user)
