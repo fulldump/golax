@@ -1,7 +1,9 @@
 <img src="logo.png">
 
 <p align="center">
-<img src="https://api.travis-ci.org/fulldump/golax.svg?branch=master">
+<a href="https://travis-ci.org/fulldump/golax"><img src="https://api.travis-ci.org/fulldump/golax.svg?branch=master"></a>
+<a href="https://goreportcard.com/report/fulldump/golax"><img src="http://goreportcard.com/badge/fulldump/golax"></a>
+<a href="https://godoc.org/github.com/fulldump/golax"><img src="https://godoc.org/github.com/fulldump/golax?status.svg" alt="GoDoc"></a>
 </p>
 
 Golax is the official go implementation for the _Lax_ framework.
