@@ -43,7 +43,3 @@ func (n *Node) Node(p string) *Node {
 
 	return new_node
 }
-
-func (n *Node) before() {
-
-}
