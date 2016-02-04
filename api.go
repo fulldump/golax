@@ -22,33 +22,33 @@ func NewApi() *Api {
 	}
 }
 
-func (this *Api) Serve() {
+func (a *Api) Serve() {
 	log.Println("Server listening at 0.0.0.0:8000")
-	http.ListenAndServe("0.0.0.0:8000", this)
+	http.ListenAndServe("0.0.0.0:8000", a)
 }
 
 /**
  * This code is ugly but... It works! This is a critical part for the
  * performance, so it has to be written with love
  */
-func (this *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Create the context and populate it
 	c := NewContext()
 	c.Response = w
 	c.Request = r
-	push_middlewares(this.Root, c)
+	push_middlewares(a.Root, c)
 
 	path := r.URL.Path
 
 	// No prefix, not found
-	if !strings.HasPrefix(path, this.Prefix) {
-		run_handler_in_context(this.Handler404, c)
+	if !strings.HasPrefix(path, a.Prefix) {
+		run_handler_in_context(a.Handler404, c)
 		return
 	}
 
 	// Remove prefix
-	path = strings.TrimPrefix(path, this.Prefix)
+	path = strings.TrimPrefix(path, a.Prefix)
 
 	// Split path
 	parts := strings.Split(path, "/")[1:]
@@ -60,7 +60,7 @@ func (this *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Search the right node
-	current := this.Root
+	current := a.Root
 	for _, part := range parts {
 
 		found := false
@@ -81,7 +81,7 @@ func (this *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if found {
 			push_middlewares(current, c)
 		} else {
-			run_handler_in_context(this.Handler404, c)
+			run_handler_in_context(a.Handler404, c)
 			return
 		}
 	}
@@ -97,7 +97,7 @@ func (this *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	run_handler_in_context(this.Handler405, c)
+	run_handler_in_context(a.Handler405, c)
 }
 
 func default_handler_404(c *Context) {

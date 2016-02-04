@@ -10,29 +10,29 @@ type ResponseTest struct {
 	http.Response
 }
 
-func (this *ResponseTest) BodyBytes() []byte {
-	body, err := ioutil.ReadAll(this.Body)
+func (rt *ResponseTest) BodyBytes() []byte {
+	body, err := ioutil.ReadAll(rt.Body)
 	if err != nil {
 		panic(err)
 	}
 	return body
 }
 
-func (this *ResponseTest) BodyString() string {
-	return string(this.BodyBytes())
+func (rt *ResponseTest) BodyString() string {
+	return string(rt.BodyBytes())
 }
 
-func (this *ResponseTest) BodyJson() interface{} {
+func (rt *ResponseTest) BodyJson() interface{} {
 	var body interface{}
-	if err := json.Unmarshal(this.BodyBytes(), &body); err != nil {
+	if err := json.Unmarshal(rt.BodyBytes(), &body); err != nil {
 		panic(err)
 	}
 	return body
 }
 
-func (this *ResponseTest) BodyJsonMap() *map[string]interface{} {
+func (rt *ResponseTest) BodyJsonMap() *map[string]interface{} {
 	body := map[string]interface{}{}
-	if err := json.Unmarshal(this.BodyBytes(), &body); err != nil {
+	if err := json.Unmarshal(rt.BodyBytes(), &body); err != nil {
 		panic(err)
 	}
 	return &body

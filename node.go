@@ -23,27 +23,27 @@ func NewNode() *Node {
 	}
 }
 
-func (this *Node) Method(m string, h Handler) *Node {
+func (n *Node) Method(m string, h Handler) *Node {
 	// TODO: m to uppercase
 	M := strings.ToUpper(m)
-	this.Methods[M] = h
-	return this
+	n.Methods[M] = h
+	return n
 }
 
-func (this *Node) Middleware(m *Middleware) *Node {
-	this.middlewares = append(this.middlewares, m)
-	return this
+func (n *Node) Middleware(m *Middleware) *Node {
+	n.middlewares = append(n.middlewares, m)
+	return n
 }
 
-func (this *Node) Node(p string) *Node {
+func (n *Node) Node(p string) *Node {
 	new_node := NewNode()
 	new_node.Path = p
 
-	this.Children = append(this.Children, new_node)
+	n.Children = append(n.Children, new_node)
 
 	return new_node
 }
 
-func (this *Node) before() {
+func (n *Node) before() {
 
 }

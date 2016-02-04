@@ -16,10 +16,10 @@ func NewWorld() *World {
 	}
 }
 
-func (this *World) Destroy() {
-	this.Server.Close()
+func (w *World) Destroy() {
+	w.Server.Close()
 }
 
-func (this *World) Request(method, path string) *RequestTest {
-	return NewRequestTest(method, this.Server.URL+path)
+func (w *World) Request(method, path string) *RequestTest {
+	return NewRequestTest(method, w.Server.URL+path)
 }

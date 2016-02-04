@@ -25,21 +25,21 @@ func NewContext() *Context {
 	}
 }
 
-func (this *Context) Error(s int, d string) *ContextError {
-	this.Response.WriteHeader(s)
+func (c *Context) Error(s int, d string) *ContextError {
+	c.Response.WriteHeader(s)
 	e := &ContextError{
 		StatusCode:  s,
 		Description: d,
 	}
-	this.LastError = e
+	c.LastError = e
 	return e
 }
 
-func (this *Context) Set(k string, v interface{}) {
-	this.Scope[k] = v
+func (c *Context) Set(k string, v interface{}) {
+	c.Scope[k] = v
 }
 
-func (this *Context) Get(k string) (interface{}, bool) {
-	a, b := this.Scope[k]
+func (c *Context) Get(k string) (interface{}, bool) {
+	a, b := c.Scope[k]
 	return a, b
 }

@@ -18,8 +18,8 @@ func NewRequestTest(method, path string) *RequestTest {
 	return &RequestTest{*request}
 }
 
-func (this *RequestTest) Do() *ResponseTest {
-	response, err := http.DefaultClient.Do(&this.Request)
+func (rt *RequestTest) Do() *ResponseTest {
+	response, err := http.DefaultClient.Do(&rt.Request)
 	if err != nil {
 		panic(err)
 	}
