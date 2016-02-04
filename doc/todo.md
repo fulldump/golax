@@ -6,6 +6,7 @@
 * implement some out-of-the-box middlewares
 * performance benchmarks
 * More flexible `Api.Serve()`
+* To be discussed: the best way to break the flow execution
 
 ## Done
 * parameters

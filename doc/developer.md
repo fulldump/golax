@@ -4,6 +4,7 @@
 - [Implementation decisions](#implementation-decisions)
     - [Decision #1: Only context](#decision-1-only-context)
     - [Decision #2: The Hollywood Principle](#decision-2-the-hollywood-principle)
+    - [Decision #3: Interceptor flow](#decision-3-interceptor-flow)
 
 <!-- /MarkdownTOC -->
 
@@ -45,4 +46,18 @@ About code readability, `w.Write(...)` is shorter but `c.Response.Write(...)` is
 Changing _Middleware_ vs _Interceptor_ is a semantic decision to break up with Sinatra styled frameworks.
 
 Typical middlewares should call to `next()` to continue chaining execution. On the other hand, an interceptor has two parts `Before` and `After` and you don't have to call any `next()` or similar. It follows the _Hollywood Principle_ known as "Don't call us, we'll call you".
+
+
+## Decision #3: Interceptor flow
+
+![Normal flow](figure_1_normal_flow.png)
+
+Each node in the routing hierarchy executes all its parent nodes interceptors. Why?
+
+This is the desired behaviour for the 95% of the cases or even more. With several advantages:
+
+* You don't have to repeat the interceptor (or middleware) in every endpoint.
+* You get prettier, more readable and understandable code.
+* Avoid human errors.
+
 
