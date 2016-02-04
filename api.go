@@ -113,8 +113,8 @@ func is_parameter(path string) bool {
 }
 
 func push_middlewares(n *Node, c *Context) {
-	for _, m := range n.middlewares {
-		c.Middlewares = append(c.Middlewares, m)
+	for _, m := range n.interceptors {
+		c.Interceptors = append(c.Interceptors, m)
 	}
 }
 
@@ -125,12 +125,12 @@ func push_middlewares(n *Node, c *Context) {
 func run_handler_in_context(f Handler, c *Context) {
 	afters := []Handler{}
 
-	for _, middleware := range c.Middlewares {
-		if nil != middleware.After {
-			afters = append(afters, middleware.After)
+	for _, interceptor := range c.Interceptors {
+		if nil != interceptor.After {
+			afters = append(afters, interceptor.After)
 		}
-		if nil != middleware.Before {
-			middleware.Before(c)
+		if nil != interceptor.Before {
+			interceptor.Before(c)
 			if nil != c.LastError {
 				break
 			}

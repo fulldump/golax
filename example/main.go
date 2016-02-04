@@ -12,14 +12,14 @@ func main() {
 	my_api := golax.NewApi()
 	my_api.Prefix = "/service/v1"
 
-	my_api.Root.Middleware(golax.MiddlewareError)
+	my_api.Root.Interceptor(golax.InterceptorError)
 
 	users := my_api.Root.Node("users").
 		Method("GET", get_users).
 		Method("POST", post_users)
 
 	users.Node("{user_id}").
-		Middleware(middleware_user).
+		Interceptor(interceptor_user).
 		Method("GET", get_user).
 		Method("POST", post_user).
 		Method("DELETE", delete_user)
@@ -65,11 +65,11 @@ func delete_user(c *golax.Context) {
 }
 
 /**
- * Middleware {user_id}
+ * Interceptor {user_id}
  * if: `user_id` exists -> load the object and put it available in the context
  * else: raise 404
  */
-var middleware_user = &golax.Middleware{
+var interceptor_user = &golax.Interceptor{
 	Before: func(c *golax.Context) {
 		user_id, _ := strconv.Atoi(c.Parameter)
 		if user, exists := users[user_id]; exists {

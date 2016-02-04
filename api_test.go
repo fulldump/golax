@@ -248,7 +248,7 @@ func Test_Method_error_555(t *testing.T) {
 	world := NewWorld()
 	defer world.Destroy()
 
-	world.Api.Root.Middleware(&Middleware{
+	world.Api.Root.Interceptor(&Interceptor{
 		After: func(c *Context) {
 			if nil != c.LastError {
 				c.Response.WriteHeader(c.LastError.StatusCode)
@@ -303,7 +303,7 @@ func Test_Parameter_precedence(t *testing.T) {
 	defer world.Destroy()
 
 	root := world.Api.Root
-	root.Middleware(&Middleware{
+	root.Interceptor(&Interceptor{
 		After: func(c *Context) {
 			if nil != c.LastError {
 				c.Response.WriteHeader(c.LastError.StatusCode)

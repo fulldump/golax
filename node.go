@@ -3,23 +3,23 @@ package golax
 import "strings"
 
 type Node struct {
-	Path        string
-	middlewares []*Middleware // to be defined
-	Methods     map[string]Handler
-	Children    []*Node
+	Path         string
+	interceptors []*Interceptor // to be defined
+	Methods      map[string]Handler
+	Children     []*Node
 }
 
-type Middleware struct {
+type Interceptor struct {
 	Before Handler
 	After  Handler
 }
 
 func NewNode() *Node {
 	return &Node{
-		Path:        "",
-		middlewares: []*Middleware{},
-		Methods:     map[string]Handler{},
-		Children:    []*Node{},
+		Path:         "",
+		interceptors: []*Interceptor{},
+		Methods:      map[string]Handler{},
+		Children:     []*Node{},
 	}
 }
 
@@ -30,8 +30,8 @@ func (n *Node) Method(m string, h Handler) *Node {
 	return n
 }
 
-func (n *Node) Middleware(m *Middleware) *Node {
-	n.middlewares = append(n.middlewares, m)
+func (n *Node) Interceptor(m *Interceptor) *Node {
+	n.interceptors = append(n.interceptors, m)
 	return n
 }
 
