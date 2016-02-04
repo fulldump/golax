@@ -54,11 +54,11 @@ my_api.Serve()
 
 If I want to handle a `GET /users/1234/stats` request, all interceptors in nodes from `<root>` to `.../stats` are executed:
 
-![Normal flow](figure_1_normal_flow.png)
+![Normal flow](doc/figure_1_normal_flow.png)
 
 To abort the execution, call to `c.Error(404, "Resource not found")`:
 
-![Break flow](figure_2_break_flow.png)
+![Break flow](doc/figure_2_break_flow.png)
 
 ## Handling parameters
 
