@@ -63,7 +63,7 @@ The performance compared with the [most popular alternative](http://www.gorillat
 
 Tests has been executed in a `Intel(R) Core(TM) i5-3210M CPU @ 2.50GHz`.
 
-Learn more about this (https://github.com/fulldump/golax-performance)[https://github.com/fulldump/golax-performance].
+Learn more about this https://github.com/fulldump/golax-performance.
 
 ## How interceptor works
 
