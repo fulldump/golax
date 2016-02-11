@@ -12,6 +12,7 @@ Golax is the official go implementation for the _Lax_ framework.
 
 - [About Lax](#about-lax)
 - [Getting started](#getting-started)
+- [Performance](#performance)
 - [How interceptor works](#how-interceptor-works)
 - [Handling parameters](#handling-parameters)
 - [Sample use cases](#sample-use-cases)
@@ -51,6 +52,18 @@ my_api.Root.Node("hello").
 
 my_api.Serve()
 ```
+
+## Performance
+
+The performance compared with the [most popular alternative](http://www.gorillatoolkit.org/) is very similar (actually _golax_ performs slightly better) however code readability and maintainability is far better with _golax_ implementation.
+
+<p align="center">
+    <img src="doc/figure_3_performance.png">
+</p>
+
+Tests has been executed in a `Intel(R) Core(TM) i5-3210M CPU @ 2.50GHz`.
+
+Learn more about this (https://github.com/fulldump/golax-performance)[https://github.com/fulldump/golax-performance].
 
 ## How interceptor works
 
