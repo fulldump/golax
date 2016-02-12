@@ -28,7 +28,7 @@ var InterceptorError = &Interceptor{
 var InterceptorLog = &Interceptor{
 	After: func(c *Context) {
 		log.Printf(
-			"%s\t%s\t%d\t%db",
+			"%s\t%s\t%d\t%dB",
 			c.Request.Method,
 			c.Request.URL.RequestURI(),
 			c.Response.StatusCode,
