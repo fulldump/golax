@@ -9,6 +9,7 @@ type Context struct {
 	LastError    *ContextError
 	Scope        map[string]interface{}
 	Interceptors []*Interceptor
+	PathHandlers string
 }
 
 type ContextError struct {

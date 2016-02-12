@@ -59,6 +59,9 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		parts = parts[:last]
 	}
 
+	// Calculate PathHttp and PathHandler
+	c.PathHandlers = a.Prefix
+
 	// Search the right node
 	current := a.Root
 	for _, part := range parts {
@@ -67,11 +70,13 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		for _, child := range current.Children {
 			if is_parameter(child.Path) {
 				c.Parameter = part
+				c.PathHandlers += "/" + child.Path
 				found = true
 				current = child
 				break
 			} else if part == child.Path {
 				c.Parameter = ""
+				c.PathHandlers += "/" + part
 				found = true
 				current = child
 				break
@@ -81,6 +86,7 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if found {
 			push_interceptors(current, c)
 		} else {
+			c.PathHandlers = "<Handler404>"
 			run_handler_in_context(a.Handler404, c)
 			return
 		}
@@ -97,6 +103,7 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.PathHandlers = "<Handler405>"
 	run_handler_in_context(a.Handler405, c)
 }
 
