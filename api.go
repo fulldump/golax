@@ -37,7 +37,7 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := NewContext()
 	c.Response = NewExtendedWriter(w)
 	c.Request = r
-	push_middlewares(a.Root, c)
+	push_interceptors(a.Root, c)
 
 	path := r.URL.Path
 
@@ -79,7 +79,7 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if found {
-			push_middlewares(current, c)
+			push_interceptors(current, c)
 		} else {
 			run_handler_in_context(a.Handler404, c)
 			return
@@ -112,7 +112,7 @@ func is_parameter(path string) bool {
 	return '{' == path[0] && '}' == path[len(path)-1]
 }
 
-func push_middlewares(n *Node, c *Context) {
+func push_interceptors(n *Node, c *Context) {
 	for _, m := range n.interceptors {
 		c.Interceptors = append(c.Interceptors, m)
 	}

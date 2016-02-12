@@ -99,6 +99,6 @@ TODO: put here some examples to cover cool things:
 * node cycling
 * readability
 * node preference
-* sample logging middleware
-* sample auth middleware
+* sample logging interceptor
+* sample auth interceptor
 * sample api errors
