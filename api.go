@@ -35,7 +35,7 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Create the context and populate it
 	c := NewContext()
-	c.Response = w
+	c.Response = NewExtendedWriter(w)
 	c.Request = r
 	push_middlewares(a.Root, c)
 

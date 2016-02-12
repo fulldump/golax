@@ -4,7 +4,7 @@ import "net/http"
 
 type Context struct {
 	Request      *http.Request
-	Response     http.ResponseWriter
+	Response     *ExtendedWriter
 	Parameter    string
 	LastError    *ContextError
 	Scope        map[string]interface{}

@@ -12,7 +12,9 @@ func main() {
 	my_api := golax.NewApi()
 	my_api.Prefix = "/service/v1"
 
-	my_api.Root.Interceptor(golax.InterceptorError)
+	my_api.Root.
+		Interceptor(golax.InterceptorLog).
+		Interceptor(golax.InterceptorError)
 
 	users := my_api.Root.Node("users").
 		Method("GET", get_users).
