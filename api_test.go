@@ -431,3 +431,40 @@ func Test_handling(t *testing.T) {
 		t.Error("Body does not match")
 	}
 }
+
+func Test_RegexParameter_ok(t *testing.T) {
+	world := NewWorld()
+	defer world.Destroy()
+
+	world.Api.Root.Node("(^a+$)").Method("GET", func(c *Context) {
+		fmt.Fprint(c.Response, "a+:", c.Parameter)
+	})
+
+	world.Api.Root.Node("(^b+$)").Method("GET", func(c *Context) {
+		fmt.Fprint(c.Response, "b+:", c.Parameter)
+	})
+
+	world.Api.Root.Node("abba").Method("GET", func(c *Context) {
+		fmt.Fprint(c.Response, "static:abba")
+	})
+
+	r1 := world.Request("GET", "/a").Do()
+	if "a+:a" != r1.BodyString() {
+		t.Error("r1: Body a+ does not match")
+	}
+
+	r2 := world.Request("GET", "/bbbbb").Do()
+	if "b+:bbbbb" != r2.BodyString() {
+		t.Error("Body b+ does not match")
+	}
+
+	r3 := world.Request("GET", "/abba").Do()
+	if "static:abba" != r3.BodyString() {
+		t.Error("Body abba does not match")
+	}
+
+	r4 := world.Request("GET", "/").Do()
+	if 405 != r4.StatusCode {
+		t.Error("r4: Status code does not match")
+	}
+}
