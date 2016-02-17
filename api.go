@@ -37,13 +37,13 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := NewContext()
 	c.Response = NewExtendedWriter(w)
 	c.Request = r
-	push_interceptors(a.Root, c)
+	run_interceptors(a.Root, c)
 
 	path := r.URL.Path
 
 	// No prefix, not found
 	if !strings.HasPrefix(path, a.Prefix) {
-		run_handler_in_context(a.Handler404, c)
+		run_handler(a.Handler404, c)
 		return
 	}
 
@@ -84,27 +84,27 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if found {
-			push_interceptors(current, c)
+			run_interceptors(current, c)
 		} else {
 			c.PathHandlers = "<Handler404>"
-			run_handler_in_context(a.Handler404, c)
+			run_handler(a.Handler404, c)
 			return
 		}
 	}
 
 	method := strings.ToUpper(r.Method)
 	if f, exists := current.Methods[method]; exists {
-		run_handler_in_context(f, c)
+		run_handler(f, c)
 		return
 	}
 
 	if f, exists := current.Methods["*"]; exists {
-		run_handler_in_context(f, c)
+		run_handler(f, c)
 		return
 	}
 
 	c.PathHandlers = "<Handler405>"
-	run_handler_in_context(a.Handler405, c)
+	run_handler(a.Handler405, c)
 }
 
 func default_handler_404(c *Context) {
@@ -119,36 +119,26 @@ func is_parameter(path string) bool {
 	return '{' == path[0] && '}' == path[len(path)-1]
 }
 
-func push_interceptors(n *Node, c *Context) {
-	for _, m := range n.interceptors {
-		c.Interceptors = append(c.Interceptors, m)
-	}
-}
-
-/**
- * This code is very ugly... it also has a huge impact over the performance so
- * tricks are welcome
- */
-func run_handler_in_context(f Handler, c *Context) {
-	afters := []Handler{}
-
-	for _, interceptor := range c.Interceptors {
-		if nil != interceptor.After {
-			afters = append(afters, interceptor.After)
+func run_interceptors(n *Node, c *Context) {
+	for _, i := range n.interceptors {
+		if nil != i.After {
+			c.afters = append(c.afters, i.After)
 		}
-		if nil != interceptor.Before {
-			interceptor.Before(c)
+
+		if nil != i.Before {
+			i.Before(c)
 			if nil != c.LastError {
 				break
 			}
 		}
 	}
+}
 
+func run_handler(f Handler, c *Context) {
 	if nil == c.LastError {
 		f(c)
 	}
-
-	for i := len(afters) - 1; i >= 0; i-- {
-		afters[i](c)
+	for i := len(c.afters) - 1; i >= 0; i-- {
+		c.afters[i](c)
 	}
 }

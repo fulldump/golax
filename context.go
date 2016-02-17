@@ -8,8 +8,8 @@ type Context struct {
 	Parameter    string
 	LastError    *ContextError
 	Scope        map[string]interface{}
-	Interceptors []*Interceptor
 	PathHandlers string
+	afters       []Handler
 }
 
 type ContextError struct {
@@ -20,9 +20,9 @@ type ContextError struct {
 
 func NewContext() *Context {
 	return &Context{
-		LastError:    nil,
-		Scope:        map[string]interface{}{},
-		Interceptors: []*Interceptor{},
+		LastError: nil,
+		Scope:     map[string]interface{}{},
+		afters:    []Handler{},
 	}
 }
 
