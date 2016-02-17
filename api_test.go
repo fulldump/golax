@@ -355,3 +355,79 @@ func Test_Parameter_precedence(t *testing.T) {
 	}
 
 }
+
+/**
+ * https://github.com/fulldump/golax/issues/5
+ * If a parameter is not the last one, it is not possible getting its value
+ */
+func Test_ParameterBug_issue_5(t *testing.T) {
+	world := NewWorld()
+	defer world.Destroy()
+
+	my_interceptor := &Interceptor{
+		Before: func(c *Context) {
+			c.Set("my_parameter", c.Parameter)
+		},
+	}
+
+	get_profile := func(c *Context) {
+		my_parameter, _ := c.Get("my_parameter")
+		fmt.Fprint(c.Response, "parameter: "+my_parameter.(string))
+	}
+
+	world.Api.Root.
+		Node("users").
+		Node("{aa}").
+		Interceptor(my_interceptor).
+		Node("profile").Method("GET", get_profile)
+
+	response := world.Request("GET", "/users/-the-value-/profile").Do()
+
+	body := response.BodyString()
+
+	if "parameter: -the-value-" != body {
+		t.Error("Body does not match")
+	}
+}
+
+func Test_handling(t *testing.T) {
+	world := NewWorld()
+	defer world.Destroy()
+
+	wrapper := func(text string) *Interceptor {
+		return &Interceptor{
+			Before: func(c *Context) {
+				fmt.Println(text)
+				fmt.Fprintf(c.Response, "%s(", text)
+			},
+			After: func(c *Context) {
+				fmt.Println("/" + text)
+				fmt.Fprintf(c.Response, ")%s", text)
+			},
+		}
+	}
+
+	root := world.Api.Root
+	root.Interceptor(wrapper("root"))
+
+	a := root.Node("a")
+	a.Interceptor(wrapper("a"))
+
+	b := a.Node("b")
+	b.Interceptor(wrapper("b"))
+
+	c := b.Node("c")
+	c.Interceptor(wrapper("c"))
+	c.Method("GET", func(c *Context) {
+		fmt.Println("Hello world, I am C")
+		fmt.Fprint(c.Response, "Hello world, I am C")
+	})
+
+	response := world.Request("GET", "/a/b/c").Do()
+
+	body := response.BodyString()
+
+	if "root(a(b(c(Hello world, I am C)c)b)a)root" != body {
+		t.Error("Body does not match")
+	}
+}
