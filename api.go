@@ -3,6 +3,7 @@ package golax
 import (
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -23,8 +24,9 @@ func NewApi() *Api {
 }
 
 func (a *Api) Serve() {
-	log.Println("Server listening at 0.0.0.0:8000")
-	http.ListenAndServe("0.0.0.0:8000", a)
+	origin := "0.0.0.0:8000"
+	log.Println("Server listening at " + origin)
+	http.ListenAndServe(origin, a)
 }
 
 /**
@@ -74,6 +76,15 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				found = true
 				current = child
 				break
+			} else if is_regex(child.Path) {
+				regex := child.Path[1 : len(child.Path)-1]
+				if match, _ := regexp.MatchString(regex, part); match {
+					c.Parameter = part
+					c.PathHandlers += "/" + child.Path
+					found = true
+					current = child
+					break
+				}
 			} else if part == child.Path {
 				c.Parameter = ""
 				c.PathHandlers += "/" + part
@@ -117,6 +128,10 @@ func default_handler_405(c *Context) {
 
 func is_parameter(path string) bool {
 	return '{' == path[0] && '}' == path[len(path)-1]
+}
+
+func is_regex(path string) bool {
+	return '(' == path[0] && ')' == path[len(path)-1]
 }
 
 func run_interceptors(n *Node, c *Context) {
