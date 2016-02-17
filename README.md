@@ -12,6 +12,7 @@ Golax is the official go implementation for the _Lax_ framework.
 
 - [About Lax](#about-lax)
 - [Getting started](#getting-started)
+- [Routing example](#routing-example)
 - [Performance](#performance)
 - [How interceptor works](#how-interceptor-works)
 - [Handling parameters](#handling-parameters)
@@ -52,6 +53,20 @@ my_api.Root.Node("hello").
 
 my_api.Serve()
 ```
+
+## Routing example
+
+Routing is based on nodes.
+
+<p align="center">
+    <img src="doc/figure_4_routing_example.png">
+</p>
+
+There are three types: `static`, `regex` and `parameter`.
+
+* static: Only matches with the url part if it is exactly the same.
+* regex: Surrounded by `(` and `)`, if the regex match.
+* parameter: Surrounded by `{` and `}`, always matches.
 
 ## Performance
 
