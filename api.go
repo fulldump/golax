@@ -135,7 +135,7 @@ func is_regex(path string) bool {
 }
 
 func run_interceptors(n *Node, c *Context) {
-	for _, i := range n.interceptors {
+	for _, i := range n.Interceptors {
 		if nil != i.After {
 			c.afters = append(c.afters, i.After)
 		}

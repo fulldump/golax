@@ -19,6 +19,20 @@ var InterceptorError = &Interceptor{
 			json.NewEncoder(c.Response).Encode(c.LastError)
 		}
 	},
+	Documentation: Doc{
+		Name: "Error",
+		Description: `
+Print JSON error in this form:
+
+´´´json
+{
+	"status_code": 404,
+	"error_code": 21,
+	"description_code": "User '231223' not found."
+}
+´´´
+		`,
+	},
 }
 
 /**
@@ -34,5 +48,12 @@ var InterceptorLog = &Interceptor{
 			c.Response.StatusCode,
 			c.Response.Length,
 		)
+	},
+	Documentation: Doc{
+		Name: "Log",
+		Description: `
+Log all HTTP requests to stdout in this form:
+
+		`,
 	},
 }
