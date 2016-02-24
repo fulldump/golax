@@ -490,5 +490,4 @@ func Test_FullPath(t *testing.T) {
 		t.Error("Parameter does not match")
 	}
 
-	t.Error("STOP")
 }
