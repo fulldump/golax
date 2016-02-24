@@ -3,35 +3,41 @@ package golax
 import "strings"
 
 type Node struct {
-	Path         string
-	interceptors []*Interceptor // to be defined
-	Methods      map[string]Handler
-	Children     []*Node
-}
-
-type Interceptor struct {
-	Before Handler
-	After  Handler
+	Path                 string
+	Interceptors         []*Interceptor
+	Methods              map[string]Handler
+	Children             []*Node
+	Documentation        Doc
+	DocumentationMethods map[string]Doc
 }
 
 func NewNode() *Node {
 	return &Node{
-		Path:         "",
-		interceptors: []*Interceptor{},
-		Methods:      map[string]Handler{},
-		Children:     []*Node{},
+		Path:                 "",
+		Interceptors:         []*Interceptor{},
+		Methods:              map[string]Handler{},
+		Children:             []*Node{},
+		DocumentationMethods: map[string]Doc{},
 	}
 }
 
-func (n *Node) Method(m string, h Handler) *Node {
-	// TODO: m to uppercase
+func (n *Node) Method(m string, h Handler, d ...Doc) *Node {
 	M := strings.ToUpper(m)
 	n.Methods[M] = h
+	if len(d) > 0 {
+		n.DocumentationMethods[M] = d[0]
+	}
 	return n
 }
 
 func (n *Node) Interceptor(m *Interceptor) *Node {
-	n.interceptors = append(n.interceptors, m)
+	n.Interceptors = append(n.Interceptors, m)
+	return n
+}
+
+func (n *Node) Doc(d Doc) *Node {
+	n.Documentation = d
+
 	return n
 }
 

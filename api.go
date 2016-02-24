@@ -66,11 +66,21 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Search the right node
 	current := a.Root
-	for _, part := range parts {
+	for i, part := range parts {
 
+		fullpath := false
 		found := false
 		for _, child := range current.Children {
 			if is_parameter(child.Path) {
+				if "{{*}}" == child.Path {
+					// Fullpath
+					fullpath = true
+					c.Parameter = strings.Join(parts[i:], "/")
+					c.PathHandlers += "/" + child.Path
+					found = true
+					current = child
+					break
+				}
 				c.Parameter = part
 				c.PathHandlers += "/" + child.Path
 				found = true
@@ -94,7 +104,10 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if found {
+		if fullpath {
+			run_interceptors(current, c)
+			break
+		} else if found {
 			run_interceptors(current, c)
 		} else {
 			c.PathHandlers = "<Handler404>"
@@ -135,7 +148,7 @@ func is_regex(path string) bool {
 }
 
 func run_interceptors(n *Node, c *Context) {
-	for _, i := range n.interceptors {
+	for _, i := range n.Interceptors {
 		if nil != i.After {
 			c.afters = append(c.afters, i.After)
 		}

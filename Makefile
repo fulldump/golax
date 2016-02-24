@@ -14,14 +14,15 @@ clean:
 
 setup:
 	mkdir -p _vendor/src/github.com/fulldump
+	rm -fr _vendor/src/github.com/fulldump/golax
 	ln -s ../../../.. _vendor/src/github.com/fulldump/golax
 	ln -s ../../example _vendor/src/example
 
-test: clean setup
+test: clean setup dependencies
 	$(GOCMD) test ./...
 
 dependencies:
-	$(GOCMD) get $(PROJECT)
+	$(GOCMD) get example
 
-example: clean setup
+example: clean setup dependencies
 	$(GOCMD) install example

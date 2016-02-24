@@ -468,3 +468,26 @@ func Test_RegexParameter_ok(t *testing.T) {
 		t.Error("r4: Status code does not match")
 	}
 }
+
+func Test_FullPath(t *testing.T) {
+	world := NewWorld()
+	defer world.Destroy()
+
+	world.Api.Prefix = "/service"
+
+	world.Api.Root.Node("files").Node("{{*}}").Method(
+		"GET",
+		func(c *Context) {
+			fmt.Fprint(c.Response, c.Parameter)
+		},
+	)
+
+	response := world.Request("GET", "/service/files/static/docs/document.txt").Do()
+
+	body := response.BodyString()
+
+	if "static/docs/document.txt" != body {
+		t.Error("Parameter does not match")
+	}
+
+}
