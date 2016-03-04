@@ -491,3 +491,152 @@ func Test_FullPath(t *testing.T) {
 	}
 
 }
+
+func always_break(name string) *Interceptor {
+	return &Interceptor{
+		Before: func(c *Context) {
+			c.Response.Header().Add("Interceptors", "[BREAK "+name+"]")
+			c.Error(666, "Break "+name)
+		},
+	}
+}
+
+func always_work(name string) *Interceptor {
+	return &Interceptor{
+		Before: func(c *Context) {
+			c.Response.Header().Add("Interceptors", "[WORK "+name+"]")
+		},
+	}
+}
+
+func Test_Interceptors_ErrorChain0(t *testing.T) {
+	world := NewWorld()
+	defer world.Destroy()
+
+	world.Api.Root.
+		Interceptor(always_work("1")).
+		Interceptor(always_work("2")).
+		Interceptor(always_break("Z")).
+		Method("GET", func(c *Context) {
+		c.Response.Header().Add("Interceptors", "[ROOT]")
+	}).
+		Node("node").
+		Interceptor(always_work("3")).
+		Interceptor(always_work("4")).
+		Method("GET", func(c *Context) {
+		c.Response.Header().Add("Interceptors", "[NODE]")
+	})
+
+	r := world.Request("GET", "/node").Do()
+
+	status := r.StatusCode
+	chain := strings.Join(r.Header["Interceptors"], "")
+	fmt.Println(r.StatusCode, chain)
+
+	if 666 != status {
+		t.Error("Status code should be 666")
+	}
+
+	if "[WORK 1][WORK 2][BREAK Z]" != chain {
+		t.Error("Chain does not match")
+	}
+}
+
+func Test_Interceptors_ErrorChain1(t *testing.T) {
+	world := NewWorld()
+	defer world.Destroy()
+
+	world.Api.Root.
+		Interceptor(always_work("1")).
+		Interceptor(always_break("Z")).
+		Interceptor(always_work("2")).
+		Method("GET", func(c *Context) {
+		c.Response.Header().Add("Interceptors", "[ROOT]")
+	}).
+		Node("node").
+		Interceptor(always_work("3")).
+		Interceptor(always_work("4")).
+		Method("GET", func(c *Context) {
+		c.Response.Header().Add("Interceptors", "[NODE]")
+	})
+
+	r := world.Request("GET", "/node").Do()
+
+	status := r.StatusCode
+	chain := strings.Join(r.Header["Interceptors"], "")
+	fmt.Println(r.StatusCode, chain)
+
+	if 666 != status {
+		t.Error("Status code should be 666")
+	}
+
+	if "[WORK 1][BREAK Z]" != chain {
+		t.Error("Chain does not match")
+	}
+}
+
+func Test_Interceptors_ErrorChain2(t *testing.T) {
+	world := NewWorld()
+	defer world.Destroy()
+
+	world.Api.Root.
+		Interceptor(always_work("1")).
+		Interceptor(always_work("2")).
+		Method("GET", func(c *Context) {
+		c.Response.Header().Add("Interceptors", "[ROOT]")
+	}).
+		Node("node").
+		Interceptor(always_work("3")).
+		Interceptor(always_work("4")).
+		Method("GET", func(c *Context) {
+		c.Response.Header().Add("Interceptors", "[NODE]")
+	})
+
+	r := world.Request("GET", "/node").Do()
+
+	status := r.StatusCode
+	chain := strings.Join(r.Header["Interceptors"], "")
+	fmt.Println(r.StatusCode, chain)
+
+	if 200 != status {
+		t.Error("Status code should be 666")
+	}
+
+	if "[WORK 1][WORK 2][WORK 3][WORK 4][NODE]" != chain {
+		t.Error("Chain does not match")
+	}
+}
+
+func Test_Interceptors_ErrorChain3(t *testing.T) {
+	world := NewWorld()
+	defer world.Destroy()
+
+	world.Api.Root.
+		Interceptor(always_work("1")).
+		Interceptor(always_work("2")).
+		Method("GET", func(c *Context) {
+		c.Response.Header().Add("Interceptors", "[ROOT]")
+	}).
+		Node("node").
+		Interceptor(always_work("3")).
+		Interceptor(always_break("Z")).
+		Interceptor(always_work("4")).
+		Method("GET", func(c *Context) {
+		c.Response.Header().Add("Interceptors", "[NODE]")
+	})
+
+	r := world.Request("GET", "/node").Do()
+
+	status := r.StatusCode
+	chain := strings.Join(r.Header["Interceptors"], "")
+	fmt.Println(r.StatusCode, chain)
+
+	if 666 != status {
+		t.Error("Status code should be 666")
+	}
+
+	if "[WORK 1][WORK 2][WORK 3][BREAK Z]" != chain {
+		t.Error("Chain does not match")
+	}
+
+}
