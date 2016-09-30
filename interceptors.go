@@ -62,3 +62,23 @@ Log all HTTP requests to stdout in this form:
 		)
 	},
 }
+
+/**
+ * `InterceptorNoCache`
+ * Send headers to disable browser caching
+ */
+var InterceptorNoCache = &Interceptor{
+	Documentation: Doc{
+		Name: "InterceptorNoCache",
+		Description: `
+			Avoid caching via http headers
+		`,
+	},
+	Before: func(c *Context) {
+		add := c.Response.Header().Add
+
+		add("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0")
+		add("Pragma", "no-cache")
+		add("Expires", "0")
+	},
+}
