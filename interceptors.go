@@ -3,6 +3,8 @@ package golax
 import (
 	"encoding/json"
 	"log"
+
+	"github.com/fulldump/golax"
 )
 
 /**
@@ -60,5 +62,25 @@ Log all HTTP requests to stdout in this form:
 			c.Response.StatusCode,
 			c.Response.Length,
 		)
+	},
+}
+
+/**
+ * `InterceptorNoCache`
+ * Send headers to disable browser caching
+ */
+var InterceptorNoCache = &golax.Interceptor{
+	Documentation: golax.Doc{
+		Name: "InterceptorNoCache",
+		Description: `
+			Avoid caching via http headers
+		`,
+	},
+	Before: func(c *golax.Context) {
+		add := c.Response.Header().Add
+
+		add("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0")
+		add("Pragma", "no-cache")
+		add("Expires", "0")
 	},
 }
