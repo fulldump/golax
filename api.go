@@ -76,12 +76,15 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					// Fullpath
 					fullpath = true
 					c.Parameter = strings.Join(parts[i:], "/")
+					c.Parameters["*"] = c.Parameter
 					c.PathHandlers += "/" + child.Path
 					found = true
 					current = child
 					break
 				}
 				c.Parameter = part
+				parameter_key := bi_trim("{", child.Path, "}")
+				c.Parameters[parameter_key] = c.Parameter
 				c.PathHandlers += "/" + child.Path
 				found = true
 				current = child
@@ -90,6 +93,8 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				regex := child.Path[1 : len(child.Path)-1]
 				if match, _ := regexp.MatchString(regex, part); match {
 					c.Parameter = part
+					parameter_key := bi_trim("(", child.Path, ")")
+					c.Parameters[parameter_key] = c.Parameter
 					c.PathHandlers += "/" + child.Path
 					found = true
 					current = child
@@ -145,6 +150,10 @@ func is_parameter(path string) bool {
 
 func is_regex(path string) bool {
 	return '(' == path[0] && ')' == path[len(path)-1]
+}
+
+func bi_trim(l, s, r string) string {
+	return strings.TrimLeft(strings.TrimRight(s, r), l)
 }
 
 func run_interceptors(n *Node, c *Context) {
