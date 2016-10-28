@@ -1,9 +1,11 @@
 package golax
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -285,6 +287,58 @@ func Test_Parameter(t *testing.T) {
 
 	if "The user is 42\n" != response.BodyString() {
 		t.Error("Body 'The user is 42\\n' is expected")
+	}
+
+}
+
+func Test_Parameters(t *testing.T) {
+
+	world := NewWorld()
+	defer world.Destroy()
+
+	world.Api.Root.
+		Node("{a}").
+		Node("{b}").
+		Node("(^[0-9]+[A-Z]$)").
+		Node("{{*}}").
+		Method("GET", func(c *Context) {
+		json.NewEncoder(c.Response).Encode(c.Parameters)
+	})
+
+	response := world.Request("GET", "/1/2/33Z/444/555/666").Do()
+
+	obtainedBody := response.BodyJson()
+	expectedBody := map[string]interface{}{
+		"a":             "1",
+		"b":             "2",
+		"^[0-9]+[A-Z]$": "33Z",
+		"*":             "444/555/666",
+	}
+
+	if !reflect.DeepEqual(obtainedBody, expectedBody) {
+		t.Error("Parameters are not being collected")
+	}
+
+}
+
+func Test_Parameters_collision(t *testing.T) {
+
+	world := NewWorld()
+	defer world.Destroy()
+
+	world.Api.Root.Node("{a}").Node("{a}").Method("GET", func(c *Context) {
+		json.NewEncoder(c.Response).Encode(c.Parameters)
+	})
+
+	response := world.Request("GET", "/1/2").Do()
+
+	obtainedBody := response.BodyJson()
+	expectedBody := map[string]interface{}{
+		"a": "2",
+	}
+
+	if !reflect.DeepEqual(obtainedBody, expectedBody) {
+		t.Error("Parameters are not being collected")
 	}
 
 }
