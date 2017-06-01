@@ -16,6 +16,7 @@ Golax is the official go implementation for the _Lax_ framework.
 - [Performance](#performance)
 - [How interceptor works](#how-interceptor-works)
 - [Handling parameters](#handling-parameters)
+- [Support for Google custom methods](#support-for-google-custom-methods)
 - [Sample use cases](#sample-use-cases)
 
 <!-- /MarkdownTOC -->
@@ -105,11 +106,45 @@ my_api.Root.
 my_api.Serve()
 ```
 
+It is also possible get all parameters:
+
+```go
+func (c *golax.Context) {
+    fmt.Fprintln(c.Response, "All parameters:", c.Parameters)
+}
+```
+
+## Support for Google custom methods
+
+According to Google's API design guidelines to map RPC services to REST HTTP,
+it describes custom methods as extra operations that can not be easyly mapped
+to HTTP verbs. [More info about custom methods](https://cloud.google.com/apis/design/custom_methods)
+
+For example, this URL has a custom method `:activate`:
+
+```
+https://my.service.com/v1/users/31231231231:activate
+```
+
+Golax support custom methods as operations:
+
+```go
+my_api.Root.
+    Node("v1").
+    Node("users").
+    Node("{user_id}").
+    Operation("activate").
+    Method("POST", func(c *golax.Context) {
+        user_id := c.Parameters["{user_id}"]"
+        fmt.Fprintln(c.Response, "Here is custom method ':activate' for user "+user_id)
+    })
+```
+
+
 ## Sample use cases
 
 TODO: put here some examples to cover cool things:
 
-* parameters
 * fluent implementation
 * node cycling
 * readability
