@@ -2,9 +2,10 @@
 <!-- MarkdownTOC autolink=true bracket=round depth=4 -->
 
 - [Implementation decisions](#implementation-decisions)
-    - [Decision #1: Only context](#decision-1-only-context)
-    - [Decision #2: The Hollywood Principle](#decision-2-the-hollywood-principle)
-    - [Decision #3: Interceptor flow](#decision-3-interceptor-flow)
+	- [Decision #1: Only context](#decision-1-only-context)
+	- [Decision #2: The Hollywood Principle](#decision-2-the-hollywood-principle)
+	- [Decision #3: Interceptor flow](#decision-3-interceptor-flow)
+	- [Decision #4: Custom methods](#decision-4-custom-methods)
 
 <!-- /MarkdownTOC -->
 
@@ -17,7 +18,7 @@ This part cover some of the implementation decisions taken along the development
 Handler functions has 1 parameter:
 
 ```
-func (c *lax.Context) {
+func (c *golax.Context) {
     
 }
 ```
@@ -27,7 +28,7 @@ Why not `w`, `r` and `c` and maintain developer compatibility?
 We would ended up with the following signature:
 
 ```
-func (w http.ResponseWriter, r *http.Request, c *lax.Context) {
+func (w http.ResponseWriter, r *http.Request, c *golax.Context) {
     
 }
 ```
@@ -37,7 +38,7 @@ Old code is not going to work by doing copy&paste, but you only have to replace:
 * `w` by `c.Response`
 * `r` by `c.Request`
 
-Making this decision is hard but `c *lax.Context` is much easier to remember.
+Making this decision is hard but `c *golax.Context` is much easier to remember and to write.
 
 About code readability, `w.Write(...)` is shorter but `c.Response.Write(...)` is more semantic.
 
@@ -60,4 +61,12 @@ This is the desired behaviour for the 95% of the cases or even more. With severa
 * You get prettier, more readable and understandable code.
 * Avoid human errors.
 
+
+## Decision #4: Custom methods
+
+Support for custom methods is a routing feature, you are free to use or not. It does not mean
+coupling with other libraries or adding non-routing responsibilites.
+
+If you do not use custom methods (`.Operation("your-custom-method")`) the router behaves
+exactly as if it does not support them. In other words, it is backwards compatible.
 

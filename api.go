@@ -39,7 +39,7 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := NewContext()
 	c.Response = NewExtendedWriter(w)
 	c.Request = r
-	run_interceptors(a.Root, c)
+	run_interceptors(a.Root.Interceptors, c)
 
 	path := r.URL.Path
 
@@ -66,54 +66,71 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Search the right node
 	current := a.Root
+	var operation *Operation = nil  // Resulting operation
+	last_position := len(parts) - 1 // cache parts length
+	fullpath := false
 	for i, part := range parts {
 
-		fullpath := false
+		part_last := i == last_position // cache is last part
+
 		found := false
 		for _, child := range current.Children {
-			if is_parameter(child.Path) {
-				if "{{*}}" == child.Path {
-					// Fullpath
-					fullpath = true
-					c.Parameter = strings.Join(parts[i:], "/")
-					c.Parameters["*"] = c.Parameter
-					c.PathHandlers += "/" + child.Path
-					found = true
-					current = child
-					break
+
+			child_path := child._path // cache child.Path indirection
+
+			if part_last && child._has_operations {
+				subparts := SplitTail(part, ":")
+				if 2 == len(subparts) {
+					subpart_1 := subparts[1]
+					operation_e := false
+					if operation, operation_e = child.Operations[subpart_1]; operation_e {
+						part = subparts[0]
+					}
 				}
-				c.Parameter = part
-				parameter_key := bi_trim("{", child.Path, "}")
-				c.Parameters[parameter_key] = c.Parameter
-				c.PathHandlers += "/" + child.Path
+			}
+
+			if part == child_path {
+				c.Parameter = ""
+				c.PathHandlers += "/" + part
 				found = true
 				current = child
 				break
-			} else if is_regex(child.Path) {
-				regex := child.Path[1 : len(child.Path)-1]
+			} else if child._is_parameter {
+				c.Parameter = part
+				c.Parameters[child._parameter_key] = c.Parameter
+				c.PathHandlers += "/" + child_path
+				found = true
+				current = child
+				break
+			} else if child._is_regex {
+				regex := child._parameter_key
 				if match, _ := regexp.MatchString(regex, part); match {
 					c.Parameter = part
-					parameter_key := bi_trim("(", child.Path, ")")
-					c.Parameters[parameter_key] = c.Parameter
-					c.PathHandlers += "/" + child.Path
+					c.Parameters[child._parameter_key] = c.Parameter
+					c.PathHandlers += "/" + child_path
 					found = true
 					current = child
 					break
 				}
-			} else if part == child.Path {
-				c.Parameter = ""
-				c.PathHandlers += "/" + part
+			} else if child._is_fullpath {
+				fullpath = true
+				c.Parameter = strings.Join(parts[i:], "/")
+				c.Parameters["*"] = c.Parameter
+				c.PathHandlers += "/" + child_path
 				found = true
 				current = child
 				break
 			}
 		}
 
-		if fullpath {
-			run_interceptors(current, c)
-			break
-		} else if found {
-			run_interceptors(current, c)
+		if found {
+			run_interceptors(current.Interceptors, c)
+			if nil != operation {
+				run_interceptors(operation.Interceptors, c)
+			}
+			if fullpath {
+				break
+			}
 		} else {
 			c.PathHandlers = "<Handler404>"
 			run_handler(a.Handler404, c)
@@ -121,13 +138,18 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	methods := current.Methods
+	if nil != operation {
+		methods = operation.Methods
+	}
+
 	method := strings.ToUpper(r.Method)
-	if f, exists := current.Methods[method]; exists {
+	if f, exists := methods[method]; exists {
 		run_handler(f, c)
 		return
 	}
 
-	if f, exists := current.Methods["*"]; exists {
+	if f, exists := methods["*"]; exists {
 		run_handler(f, c)
 		return
 	}
@@ -144,23 +166,11 @@ func default_handler_405(c *Context) {
 	c.Error(405, "Method not allowed")
 }
 
-func is_parameter(path string) bool {
-	return '{' == path[0] && '}' == path[len(path)-1]
-}
-
-func is_regex(path string) bool {
-	return '(' == path[0] && ')' == path[len(path)-1]
-}
-
-func bi_trim(l, s, r string) string {
-	return strings.TrimLeft(strings.TrimRight(s, r), l)
-}
-
-func run_interceptors(n *Node, c *Context) {
+func run_interceptors(l []*Interceptor, c *Context) {
 	if nil != c.LastError {
 		return
 	}
-	for _, i := range n.Interceptors {
+	for _, i := range l {
 		if nil != i.After {
 			c.afters = append(c.afters, i.After)
 		}
