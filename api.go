@@ -3,7 +3,9 @@ package golax
 import (
 	"log"
 	"net/http"
+	"os"
 	"regexp"
+	"runtime/debug"
 	"strings"
 )
 
@@ -12,6 +14,7 @@ type Api struct {
 	Prefix     string
 	Handler405 Handler
 	Handler404 Handler
+	Handler500 Handler
 }
 
 func NewApi() *Api {
@@ -20,6 +23,7 @@ func NewApi() *Api {
 		Prefix:     "",
 		Handler404: default_handler_404,
 		Handler405: default_handler_405,
+		Handler500: default_handler_500,
 	}
 }
 
@@ -39,6 +43,14 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := NewContext()
 	c.Response = NewExtendedWriter(w)
 	c.Request = r
+
+	defer func(c *Context) {
+		if r := recover(); r != nil {
+			c.Error(http.StatusInternalServerError, string(debug.Stack()))
+			a.Handler500(c)
+		}
+	}(c)
+
 	run_interceptors(a.Root.Interceptors, c)
 	add_deepinterceptors(a.Root.InterceptorsDeep, c)
 
@@ -169,11 +181,16 @@ func default_handler_405(c *Context) {
 	c.Error(405, "Method not allowed")
 }
 
+func default_handler_500(c *Context) {
+	os.Stderr.WriteString(c.LastError.Description)
+	c.Error(http.StatusInternalServerError, "InternalServerError")
+}
+
 func add_deepinterceptors(l []*Interceptor, c *Context) {
 	if nil != c.LastError {
 		return
 	}
-	for _,i:= range l {
+	for _, i := range l {
 		c.deep_interceptors = append([]*Interceptor{i}, c.deep_interceptors...)
 	}
 }
