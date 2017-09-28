@@ -116,3 +116,50 @@ func Test_Operation_Combo3(t *testing.T) {
 		t.Error("Expected status code 999")
 	}
 }
+
+func Test_Operation_PathHandlers(t *testing.T) {
+	world := NewWorld()
+	defer world.Destroy()
+
+	PrintHandlers := func(c *Context) {
+		fmt.Fprint(c.Response, c.PathHandlers)
+	}
+
+	world.Api.Root.
+		Node("a").
+		Node("{b}").
+		Node("c:isNode").
+		Method("GET", PrintHandlers).
+		Node("{d}").
+		Method("GET", PrintHandlers).
+		Operation("myOperation").
+		Method("GET", PrintHandlers)
+
+	{ // Case 1
+		r := world.Request("GET", "/a/b:3/c:isNode/d:myOperation").Do()
+		body := r.BodyString()
+		expected := "/a/{b}/c:isNode/{d}:myOperation"
+		if body != expected {
+			t.Error("Expected:", expected, "Obtained:", body)
+		}
+	}
+
+	{ // Case 2
+		r := world.Request("GET", "/a/b:3/c:isNode").Do()
+		body := r.BodyString()
+		expected := "/a/{b}/c:isNode"
+		if body != expected {
+			t.Error("Expected:", expected, "Obtained:", body)
+		}
+	}
+
+	{ // Case 3
+		r := world.Request("GET", "/a/b/c:isNode/d:notOperation").Do()
+		body := r.BodyString()
+		expected := "/a/{b}/c:isNode/{d}"
+		if body != expected {
+			t.Error("Expected:", expected, "Obtained:", body)
+		}
+	}
+
+}

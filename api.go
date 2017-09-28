@@ -128,6 +128,7 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			run_interceptors(current.Interceptors, c)
 			add_deepinterceptors(current.InterceptorsDeep, c)
 			if nil != operation {
+				c.PathHandlers += ":" + operation.Path
 				run_interceptors(operation.Interceptors, c)
 			}
 			if fullpath {
