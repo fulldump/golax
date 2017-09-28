@@ -40,6 +40,7 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c.Response = NewExtendedWriter(w)
 	c.Request = r
 	run_interceptors(a.Root.Interceptors, c)
+	add_deepinterceptors(a.Root.InterceptorsDeep, c)
 
 	path := r.URL.Path
 
@@ -125,6 +126,7 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		if found {
 			run_interceptors(current.Interceptors, c)
+			add_deepinterceptors(current.InterceptorsDeep, c)
 			if nil != operation {
 				run_interceptors(operation.Interceptors, c)
 			}
@@ -166,6 +168,15 @@ func default_handler_405(c *Context) {
 	c.Error(405, "Method not allowed")
 }
 
+func add_deepinterceptors(l []*Interceptor, c *Context) {
+	if nil != c.LastError {
+		return
+	}
+	for _,i:= range l {
+		c.deep_interceptors = append([]*Interceptor{i}, c.deep_interceptors...)
+	}
+}
+
 func run_interceptors(l []*Interceptor, c *Context) {
 	if nil != c.LastError {
 		return
@@ -185,6 +196,9 @@ func run_interceptors(l []*Interceptor, c *Context) {
 }
 
 func run_handler(f Handler, c *Context) {
+
+	run_interceptors(c.deep_interceptors, c)
+
 	if nil == c.LastError {
 		f(c)
 	}

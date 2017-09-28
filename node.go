@@ -4,6 +4,7 @@ import "strings"
 
 type Node struct {
 	Interceptors         []*Interceptor
+	InterceptorsDeep     []*Interceptor
 	Methods              map[string]Handler
 	Children             []*Node
 	Documentation        Doc
@@ -22,6 +23,7 @@ func NewNode() *Node {
 	return &Node{
 		_path:                "",
 		Interceptors:         []*Interceptor{},
+		InterceptorsDeep:     []*Interceptor{},
 		Methods:              map[string]Handler{},
 		Children:             []*Node{},
 		DocumentationMethods: map[string]Doc{},
@@ -40,6 +42,11 @@ func (n *Node) Method(m string, h Handler, d ...Doc) *Node {
 
 func (n *Node) Interceptor(m *Interceptor) *Node {
 	n.Interceptors = append(n.Interceptors, m)
+	return n
+}
+
+func (n *Node) InterceptorDeep(m *Interceptor) *Node {
+	n.InterceptorsDeep = append(n.InterceptorsDeep, m)
 	return n
 }
 
@@ -98,4 +105,3 @@ func is_regex(path string) bool {
 func bi_trim(l, s, r string) string {
 	return strings.TrimLeft(strings.TrimRight(s, r), l)
 }
-

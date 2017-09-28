@@ -3,14 +3,15 @@ package golax
 import "net/http"
 
 type Context struct {
-	Request      *http.Request
-	Response     *ExtendedWriter
-	Parameter    string
-	Parameters   map[string]string
-	LastError    *ContextError
-	Scope        map[string]interface{}
-	PathHandlers string
-	afters       []Handler
+	Request           *http.Request
+	Response          *ExtendedWriter
+	Parameter         string
+	Parameters        map[string]string
+	LastError         *ContextError
+	Scope             map[string]interface{}
+	PathHandlers      string
+	afters            []Handler
+	deep_interceptors []*Interceptor
 }
 
 type ContextError struct {
@@ -21,10 +22,11 @@ type ContextError struct {
 
 func NewContext() *Context {
 	return &Context{
-		LastError:  nil,
-		Parameters: map[string]string{},
-		Scope:      map[string]interface{}{},
-		afters:     []Handler{},
+		LastError:         nil,
+		Parameters:        map[string]string{},
+		Scope:             map[string]interface{}{},
+		afters:            []Handler{},
+		deep_interceptors: []*Interceptor{},
 	}
 }
 
