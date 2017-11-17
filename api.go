@@ -1,6 +1,7 @@
 package golax
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -46,7 +47,7 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	defer func(c *Context) {
 		if r := recover(); r != nil {
-			c.Error(http.StatusInternalServerError, string(debug.Stack()))
+			c.Error(http.StatusInternalServerError, fmt.Sprintln(r)+string(debug.Stack()))
 			a.Handler500(c)
 		}
 	}(c)
