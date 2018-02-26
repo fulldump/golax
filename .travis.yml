@@ -1,10 +1,20 @@
 language: go
-env:
-  global:
-    - CC_TEST_REPORTER_ID=1d2439bd6471f837400ff913813cf146aea22d1a16f8e72ff7c56b7278ccb3ca
 go:
   - 1.5
   - 1.6
   - 1.7
   - 1.8
-
+  - 1.9
+  - 1.10
+env:
+  global:
+    - CC_TEST_REPORTER_ID=1d2439bd6471f837400ff913813cf146aea22d1a16f8e72ff7c56b7278ccb3ca
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+script:
+  - bundle exec rspec
+  - make
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
