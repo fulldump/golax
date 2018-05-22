@@ -40,21 +40,21 @@ func Test_ExtendedWriter_WriteTwice(t *testing.T) {
 
 	body := res.BodyString()
 
-	body_lines := strings.Split(body, "\n")
+	bodyLines := strings.Split(body, "\n")
 
-	if "Hello" != body_lines[0] {
-		t.Error("First line should be `Hello` instead of " + body_lines[0])
+	if "Hello" != bodyLines[0] {
+		t.Error("First line should be `Hello` instead of " + bodyLines[0])
 	}
 
-	body_json := map[string]interface{}{}
+	bodyJson := map[string]interface{}{}
 
-	json.Unmarshal([]byte(body_lines[1]), &body_json)
+	json.Unmarshal([]byte(bodyLines[1]), &bodyJson)
 
-	if !reflect.DeepEqual(float64(500), body_json["status"]) {
+	if !reflect.DeepEqual(float64(500), bodyJson["status"]) {
 		t.Error("Body json status should be status:500")
 	}
 
-	if !strings.HasPrefix(body_json["description"].(string), "This is a panic!") {
+	if !strings.HasPrefix(bodyJson["description"].(string), "This is a panic!") {
 		t.Error("Body json description should start by `This is a panic!` ")
 	}
 
