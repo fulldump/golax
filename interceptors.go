@@ -5,14 +5,14 @@ import (
 	"log"
 )
 
-/**
- * Core interceptors free to use
- */
-
-/**
- * `InterceptorError`
- * Print a JSON with the last error if exists
- */
+// InterceptorError prints an error in JSON format if Context.LastError is
+// not nil.
+// Example:
+//     {
+//         "status_code": 404,
+//         "error_code": 1000023,
+//         "description_code": "User 'fulanez' not found.",
+//     }
 var InterceptorError = &Interceptor{
 	Documentation: Doc{
 		Name: "Error",
@@ -35,10 +35,11 @@ Print JSON error in this form:
 	},
 }
 
-/**
- * `InterceptorLog`
- * Log request and response
- */
+// InterceptorLog prints an access log to standard output.
+// Example:
+// 2016/02/20 11:09:17 GET	/favicon.ico	404	59B
+// 2016/02/20 11:09:34 GET	/service/v1/	405	68B
+// 2016/02/20 11:09:46 GET	/service/v1/doc	405	68B
 var InterceptorLog = &Interceptor{
 	Documentation: Doc{
 		Name: "Log",
@@ -63,10 +64,8 @@ Log all HTTP requests to stdout in this form:
 	},
 }
 
-/**
- * `InterceptorNoCache`
- * Send headers to disable browser caching
- */
+// InterceptorNoCache set some headers to force response to not be cached
+// by user agent.
 var InterceptorNoCache = &Interceptor{
 	Documentation: Doc{
 		Name: "InterceptorNoCache",

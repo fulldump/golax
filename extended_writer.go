@@ -2,10 +2,7 @@ package golax
 
 import "net/http"
 
-/**
- * `Extended Writer`
- * It wraps http.ResponseWriter to add: StatusCode & Length
- */
+// ExtendedWriter wraps http.ResponseWriter with StatusCode & Length
 type ExtendedWriter struct {
 	StatusCode     int
 	statusCodeSent bool
@@ -13,20 +10,28 @@ type ExtendedWriter struct {
 	http.ResponseWriter
 }
 
+// NewExtendedWriter instances a new *ExtendedWriter
 func NewExtendedWriter(w http.ResponseWriter) *ExtendedWriter {
-	return &ExtendedWriter{200, false, 0, w}
+	return &ExtendedWriter{
+		StatusCode:     200,
+		statusCodeSent: false,
+		Length:         0,
+		ResponseWriter: w,
+	}
 }
 
-func (this *ExtendedWriter) Write(p []byte) (int, error) {
-	n, err := this.ResponseWriter.Write(p)
-	this.Length += n
+// Write replaces default behaviour of http.ResponseWriter
+func (w *ExtendedWriter) Write(p []byte) (int, error) {
+	n, err := w.ResponseWriter.Write(p)
+	w.Length += n
 	return n, err
 }
 
-func (this *ExtendedWriter) WriteHeader(statusCode int) {
-	this.StatusCode = statusCode
-	if !this.statusCodeSent {
-		this.ResponseWriter.WriteHeader(statusCode)
-		this.statusCodeSent = true
+// WriteHeader replaces default behaviour of http.ResponseWriter
+func (w *ExtendedWriter) WriteHeader(statusCode int) {
+	w.StatusCode = statusCode
+	if !w.statusCodeSent {
+		w.ResponseWriter.WriteHeader(statusCode)
+		w.statusCodeSent = true
 	}
 }

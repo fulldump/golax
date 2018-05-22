@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// Api is a complete API that implements http.Handler interface.
 type Api struct {
 	Root       *Node
 	Prefix     string
@@ -18,26 +19,27 @@ type Api struct {
 	Handler500 Handler
 }
 
+// NewApi instances and initializes a new *Api.
 func NewApi() *Api {
 	return &Api{
 		Root:       NewNode(),
 		Prefix:     "",
-		Handler404: default_handler_404,
-		Handler405: default_handler_405,
-		Handler500: default_handler_500,
+		Handler404: defaultHandler404,
+		Handler405: defaultHandler405,
+		Handler500: defaultHandler500,
 	}
 }
 
+// Serve start a default server on address 0.0.0.0:8000
 func (a *Api) Serve() {
 	origin := "0.0.0.0:8000"
 	log.Println("Server listening at " + origin)
 	http.ListenAndServe(origin, a)
 }
 
-/**
- * This code is ugly but... It works! This is a critical part for the
- * performance, so it has to be written with love
- */
+// ServeHTTP implements http.Handler interface.
+// This code is ugly but... It works! This is a critical part for the
+// performance, so it has to be written with love
 func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Create the context and populate it
@@ -52,14 +54,14 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}(c)
 
-	run_interceptors(a.Root.Interceptors, c)
-	add_deepinterceptors(a.Root.InterceptorsDeep, c)
+	runInterceptors(a.Root.Interceptors, c)
+	addDeepInterceptors(a.Root.InterceptorsDeep, c)
 
 	path := r.URL.Path
 
 	// No prefix, not found
 	if !strings.HasPrefix(path, a.Prefix) {
-		run_handler(a.Handler404, c)
+		runHandler(a.Handler404, c)
 		return
 	}
 
@@ -80,57 +82,57 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Search the right node
 	current := a.Root
-	var operation *Operation = nil  // Resulting operation
-	last_position := len(parts) - 1 // cache parts length
-	fullpath := false
+	var operation *Operation       // Resulting operation
+	lastPosition := len(parts) - 1 // cache parts length
+	fullPath := false
 	for i, part := range parts {
 
-		part_last := i == last_position // cache is last part
+		partLast := i == lastPosition // cache is last part
 
 		found := false
 		for _, child := range current.Children {
 
-			child_path := child._path // cache child.Path indirection
+			childPath := child._path // cache child.Path indirection
 
-			if part_last && child._has_operations {
+			if partLast && child._hasOperations {
 				subparts := SplitTail(part, ":")
 				if 2 == len(subparts) {
-					subpart_1 := subparts[1]
-					operation_e := false
-					if operation, operation_e = child.Operations[subpart_1]; operation_e {
+					subpart1 := subparts[1]
+					operationE := false
+					if operation, operationE = child.Operations[subpart1]; operationE {
 						part = subparts[0]
 					}
 				}
 			}
 
-			if part == child_path {
+			if part == childPath {
 				c.Parameter = ""
 				c.PathHandlers += "/" + part
 				found = true
 				current = child
 				break
-			} else if child._is_parameter {
+			} else if child._isParameter {
 				c.Parameter = part
-				c.Parameters[child._parameter_key] = c.Parameter
-				c.PathHandlers += "/" + child_path
+				c.Parameters[child._parameterKey] = c.Parameter
+				c.PathHandlers += "/" + childPath
 				found = true
 				current = child
 				break
-			} else if child._is_regex {
-				regex := child._parameter_key
+			} else if child._isRegex {
+				regex := child._parameterKey
 				if match, _ := regexp.MatchString(regex, part); match {
 					c.Parameter = part
-					c.Parameters[child._parameter_key] = c.Parameter
-					c.PathHandlers += "/" + child_path
+					c.Parameters[child._parameterKey] = c.Parameter
+					c.PathHandlers += "/" + childPath
 					found = true
 					current = child
 					break
 				}
-			} else if child._is_fullpath {
-				fullpath = true
+			} else if child._isFullPath {
+				fullPath = true
 				c.Parameter = strings.Join(parts[i:], "/")
 				c.Parameters["*"] = c.Parameter
-				c.PathHandlers += "/" + child_path
+				c.PathHandlers += "/" + childPath
 				found = true
 				current = child
 				break
@@ -138,18 +140,18 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if found {
-			run_interceptors(current.Interceptors, c)
-			add_deepinterceptors(current.InterceptorsDeep, c)
+			runInterceptors(current.Interceptors, c)
+			addDeepInterceptors(current.InterceptorsDeep, c)
 			if nil != operation {
 				c.PathHandlers += ":" + operation.Path
-				run_interceptors(operation.Interceptors, c)
+				runInterceptors(operation.Interceptors, c)
 			}
-			if fullpath {
+			if fullPath {
 				break
 			}
 		} else {
 			c.PathHandlers = "<Handler404>"
-			run_handler(a.Handler404, c)
+			runHandler(a.Handler404, c)
 			return
 		}
 	}
@@ -161,42 +163,42 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	method := strings.ToUpper(r.Method)
 	if f, exists := methods[method]; exists {
-		run_handler(f, c)
+		runHandler(f, c)
 		return
 	}
 
 	if f, exists := methods["*"]; exists {
-		run_handler(f, c)
+		runHandler(f, c)
 		return
 	}
 
 	c.PathHandlers = "<Handler405>"
-	run_handler(a.Handler405, c)
+	runHandler(a.Handler405, c)
 }
 
-func default_handler_404(c *Context) {
+func defaultHandler404(c *Context) {
 	c.Error(404, "Not found")
 }
 
-func default_handler_405(c *Context) {
+func defaultHandler405(c *Context) {
 	c.Error(405, "Method not allowed")
 }
 
-func default_handler_500(c *Context) {
+func defaultHandler500(c *Context) {
 	os.Stderr.WriteString(c.LastError.Description)
 	c.Error(http.StatusInternalServerError, "InternalServerError")
 }
 
-func add_deepinterceptors(l []*Interceptor, c *Context) {
+func addDeepInterceptors(l []*Interceptor, c *Context) {
 	if nil != c.LastError {
 		return
 	}
 	for _, i := range l {
-		c.deep_interceptors = append([]*Interceptor{i}, c.deep_interceptors...)
+		c.deepInterceptors = append([]*Interceptor{i}, c.deepInterceptors...)
 	}
 }
 
-func run_interceptors(l []*Interceptor, c *Context) {
+func runInterceptors(l []*Interceptor, c *Context) {
 	if nil != c.LastError {
 		return
 	}
@@ -214,9 +216,9 @@ func run_interceptors(l []*Interceptor, c *Context) {
 	}
 }
 
-func run_handler(f Handler, c *Context) {
+func runHandler(f Handler, c *Context) {
 
-	run_interceptors(c.deep_interceptors, c)
+	runInterceptors(c.deepInterceptors, c)
 
 	if nil == c.LastError {
 		f(c)

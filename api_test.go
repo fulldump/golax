@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func body_bytes(r *http.Request) []byte {
+func bodyBytes(r *http.Request) []byte {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		panic(err)
@@ -19,8 +19,8 @@ func body_bytes(r *http.Request) []byte {
 	return body
 }
 
-func body_string(r *http.Request) string {
-	return string(body_bytes(r))
+func bodyString(r *http.Request) string {
+	return string(bodyBytes(r))
 }
 
 func Test_404_ok(t *testing.T) {
@@ -302,8 +302,8 @@ func Test_Parameters(t *testing.T) {
 		Node("(^[0-9]+[A-Z]$)").
 		Node("{{*}}").
 		Method("GET", func(c *Context) {
-		json.NewEncoder(c.Response).Encode(c.Parameters)
-	})
+			json.NewEncoder(c.Response).Encode(c.Parameters)
+		})
 
 	response := world.Request("GET", "/1/2/33Z/444/555/666").Do()
 
@@ -375,8 +375,8 @@ func Test_Parameter_precedence(t *testing.T) {
 
 	user := users.Node("{user_id}")
 	user.Method("GET", func(c *Context) {
-		user_id, _ := strconv.Atoi(c.Parameter)
-		if user_id > 2000 {
+		userID, _ := strconv.Atoi(c.Parameter)
+		if userID > 2000 {
 			c.Error(404, "User "+c.Parameter+" does not exist")
 			return
 		}
@@ -418,22 +418,22 @@ func Test_ParameterBug_issue_5(t *testing.T) {
 	world := NewWorld()
 	defer world.Destroy()
 
-	my_interceptor := &Interceptor{
+	myInterceptor := &Interceptor{
 		Before: func(c *Context) {
 			c.Set("my_parameter", c.Parameter)
 		},
 	}
 
-	get_profile := func(c *Context) {
-		my_parameter, _ := c.Get("my_parameter")
-		fmt.Fprint(c.Response, "parameter: "+my_parameter.(string))
+	getProfile := func(c *Context) {
+		myParameter, _ := c.Get("my_parameter")
+		fmt.Fprint(c.Response, "parameter: "+myParameter.(string))
 	}
 
 	world.Api.Root.
 		Node("users").
 		Node("{aa}").
-		Interceptor(my_interceptor).
-		Node("profile").Method("GET", get_profile)
+		Interceptor(myInterceptor).
+		Node("profile").Method("GET", getProfile)
 
 	response := world.Request("GET", "/users/-the-value-/profile").Do()
 
@@ -546,7 +546,7 @@ func Test_FullPath(t *testing.T) {
 
 }
 
-func always_break(name string) *Interceptor {
+func alwaysBreak(name string) *Interceptor {
 	return &Interceptor{
 		Before: func(c *Context) {
 			c.Response.Header().Add("Interceptors", "[BREAK "+name+"]")
@@ -555,7 +555,7 @@ func always_break(name string) *Interceptor {
 	}
 }
 
-func always_work(name string) *Interceptor {
+func alwaysWork(name string) *Interceptor {
 	return &Interceptor{
 		Before: func(c *Context) {
 			c.Response.Header().Add("Interceptors", "[WORK "+name+"]")
@@ -568,18 +568,18 @@ func Test_Interceptors_ErrorChain0(t *testing.T) {
 	defer world.Destroy()
 
 	world.Api.Root.
-		Interceptor(always_work("1")).
-		Interceptor(always_work("2")).
-		Interceptor(always_break("Z")).
+		Interceptor(alwaysWork("1")).
+		Interceptor(alwaysWork("2")).
+		Interceptor(alwaysBreak("Z")).
 		Method("GET", func(c *Context) {
-		c.Response.Header().Add("Interceptors", "[ROOT]")
-	}).
+			c.Response.Header().Add("Interceptors", "[ROOT]")
+		}).
 		Node("node").
-		Interceptor(always_work("3")).
-		Interceptor(always_work("4")).
+		Interceptor(alwaysWork("3")).
+		Interceptor(alwaysWork("4")).
 		Method("GET", func(c *Context) {
-		c.Response.Header().Add("Interceptors", "[NODE]")
-	})
+			c.Response.Header().Add("Interceptors", "[NODE]")
+		})
 
 	r := world.Request("GET", "/node").Do()
 
@@ -601,18 +601,18 @@ func Test_Interceptors_ErrorChain1(t *testing.T) {
 	defer world.Destroy()
 
 	world.Api.Root.
-		Interceptor(always_work("1")).
-		Interceptor(always_break("Z")).
-		Interceptor(always_work("2")).
+		Interceptor(alwaysWork("1")).
+		Interceptor(alwaysBreak("Z")).
+		Interceptor(alwaysWork("2")).
 		Method("GET", func(c *Context) {
-		c.Response.Header().Add("Interceptors", "[ROOT]")
-	}).
+			c.Response.Header().Add("Interceptors", "[ROOT]")
+		}).
 		Node("node").
-		Interceptor(always_work("3")).
-		Interceptor(always_work("4")).
+		Interceptor(alwaysWork("3")).
+		Interceptor(alwaysWork("4")).
 		Method("GET", func(c *Context) {
-		c.Response.Header().Add("Interceptors", "[NODE]")
-	})
+			c.Response.Header().Add("Interceptors", "[NODE]")
+		})
 
 	r := world.Request("GET", "/node").Do()
 
@@ -634,17 +634,17 @@ func Test_Interceptors_ErrorChain2(t *testing.T) {
 	defer world.Destroy()
 
 	world.Api.Root.
-		Interceptor(always_work("1")).
-		Interceptor(always_work("2")).
+		Interceptor(alwaysWork("1")).
+		Interceptor(alwaysWork("2")).
 		Method("GET", func(c *Context) {
-		c.Response.Header().Add("Interceptors", "[ROOT]")
-	}).
+			c.Response.Header().Add("Interceptors", "[ROOT]")
+		}).
 		Node("node").
-		Interceptor(always_work("3")).
-		Interceptor(always_work("4")).
+		Interceptor(alwaysWork("3")).
+		Interceptor(alwaysWork("4")).
 		Method("GET", func(c *Context) {
-		c.Response.Header().Add("Interceptors", "[NODE]")
-	})
+			c.Response.Header().Add("Interceptors", "[NODE]")
+		})
 
 	r := world.Request("GET", "/node").Do()
 
@@ -666,18 +666,18 @@ func Test_Interceptors_ErrorChain3(t *testing.T) {
 	defer world.Destroy()
 
 	world.Api.Root.
-		Interceptor(always_work("1")).
-		Interceptor(always_work("2")).
+		Interceptor(alwaysWork("1")).
+		Interceptor(alwaysWork("2")).
 		Method("GET", func(c *Context) {
-		c.Response.Header().Add("Interceptors", "[ROOT]")
-	}).
+			c.Response.Header().Add("Interceptors", "[ROOT]")
+		}).
 		Node("node").
-		Interceptor(always_work("3")).
-		Interceptor(always_break("Z")).
-		Interceptor(always_work("4")).
+		Interceptor(alwaysWork("3")).
+		Interceptor(alwaysBreak("Z")).
+		Interceptor(alwaysWork("4")).
 		Method("GET", func(c *Context) {
-		c.Response.Header().Add("Interceptors", "[NODE]")
-	})
+			c.Response.Header().Add("Interceptors", "[NODE]")
+		})
 
 	r := world.Request("GET", "/node").Do()
 

@@ -16,13 +16,13 @@ func Test_InterceptorDeep_OK(t *testing.T) {
 		}
 	}
 
-	fail_s := ""
+	failS := ""
 	Append := func(s string) *Interceptor {
 		return &Interceptor{
 			Before: func(c *Context) {
 
-				if s == fail_s {
-					c.Error(999, "Fail cause: "+fail_s)
+				if s == failS {
+					c.Error(999, "Fail cause: "+failS)
 					Print(c)
 					return
 				}
@@ -95,7 +95,7 @@ func Test_InterceptorDeep_OK(t *testing.T) {
 	}
 
 	for s, expected := range cases {
-		fail_s = s
+		failS = s
 		res := world.Request("GET", "/a/b").Do()
 		body := res.BodyString()
 		if expected != body {
