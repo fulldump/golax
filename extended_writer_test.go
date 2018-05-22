@@ -28,8 +28,6 @@ func Test_ExtendedWriter_WriteTwice(t *testing.T) {
 
 			c.Response.Write([]byte("Hello\n"))
 			panic("This is a panic!")
-			c.Response.Write([]byte("world"))
-
 		})
 
 	fmt.Println("=============================================")
