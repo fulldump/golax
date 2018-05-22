@@ -50,7 +50,7 @@ func Test_405_ok(t *testing.T) {
 }
 
 /**
- * Whant happens if path is empty string
+ * What happens if path is empty string
  */
 func Test_border_case_1(t *testing.T) {
 	world := NewWorld()

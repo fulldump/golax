@@ -15,9 +15,9 @@ type Context struct {
 }
 
 type ContextError struct {
-	StatusCode  int    `json: "status_code"`
-	ErrorCode   int    `json: "error_code"`
-	Description string `json: "description_code"`
+	StatusCode  int    `json:"status_code"`
+	ErrorCode   int    `json:"error_code"`
+	Description string `json:"description_code"`
 }
 
 func NewContext() *Context {
