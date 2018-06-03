@@ -116,11 +116,11 @@ func getUsers(c *golax.Context) {
 }
 
 func postUsers(c *golax.Context) {
-	u := &User{}
+	u := &user{}
 
 	json.NewDecoder(c.Request.Body).Decode(u)
 
-	insert_user(u)
+	insertUser(u)
 
 	c.Response.WriteHeader(201)
 	json.NewEncoder(c.Response).Encode(map[string]interface{}{"id": u.id})
@@ -169,7 +169,7 @@ var interceptorUser = &golax.Interceptor{
 /**
  * Helper to get a user object from the context
  */
-func getContextUser(c *golax.Context) *User {
+func getContextUser(c *golax.Context) *user {
 	v, _ := c.Get("user")
-	return v.(*User)
+	return v.(*user)
 }
