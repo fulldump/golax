@@ -1,9 +1,8 @@
 <img src="logo.png">
 
 <p align="center">
-<a href="https://travis-ci.org/fulldump/golax"><img src="https://api.travis-ci.org/fulldump/golax.svg?branch=master"></a>
-<a href="https://cover.run/go?tag=golang-1.10&repo=github.com%2Ffulldump%2Fgolax"><img src="https://cover.run/go/github.com/fulldump/golax.svg?style=flat&tag=golang-1.10"></a>
-<a href="https://goreportcard.com/report/fulldump/golax"><img src="http://goreportcard.com/badge/fulldump/golax"></a>
+<a href="https://app.travis-ci.com/fulldump/golax"><img src="https://app.travis-ci.com/fulldump/golax.svg?branch=master"></a>
+<a href="https://goreportcard.com/report/github.com/fulldump/golax"><img src="https://goreportcard.com/badge/github.com/fulldump/golax"></a>
 <a href="https://godoc.org/github.com/fulldump/golax"><img src="https://godoc.org/github.com/fulldump/golax?status.svg" alt="GoDoc"></a>
 <a href="https://codeclimate.com/github/fulldump/golax/maintainability"><img src="https://api.codeclimate.com/v1/badges/798baff13203d5a4abad/maintainability" /></a>
 </p>

@@ -1,28 +1,27 @@
-PROJECT=golax
-GOPATH=$(shell pwd)/_vendor
-GOBIN=$(GOPATH)/bin
-GOPKG=$(GOPATH)/pkg
-GO=go
-GOCMD=GOPATH=$(GOPATH) GOBIN=$(GOBIN) $(GO)
+PROJECT=github.com/fulldump/golax
 
-.DEFAULT_GOAL := test
+GOCMD=go
 
-.PHONY: test clean dependencies setup example
+.PHONY: test clean dependencies setup example coverage
+
+all:	test
 
 clean:
-	rm -fr _vendor
+	rm -fr src
 
 setup:
-	mkdir -p _vendor/src/github.com/fulldump
-	rm -fr _vendor/src/github.com/fulldump/golax
-	ln -s ../../../.. _vendor/src/github.com/fulldump/golax
-	ln -s ../../example _vendor/src/example
+	mkdir -p src/$(PROJECT)
+	rmdir src/$(PROJECT)
+	ln -s ../../.. src/$(PROJECT)
 
-test: clean setup dependencies
-	$(GOCMD) test ./...
+test:
+	$(GOCMD) version
+	$(GOCMD) env
+	$(GOCMD) test $(PROJECT)
 
-dependencies:
-	$(GOCMD) get example
+example:
+	$(GOCMD) install $(PROJECT)/example
 
-example: clean setup dependencies
-	$(GOCMD) install example
+coverage:
+	$(GOCMD) test ./src/github.com/fulldump/goconfig -cover -covermode=count -coverprofile=coverage.out; \
+	$(GOCMD) tool cover -html=coverage.out
